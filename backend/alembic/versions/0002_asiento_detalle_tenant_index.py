@@ -13,7 +13,7 @@ from typing import Sequence, Union
 
 from alembic import op
 
-revision: str = "0002_asiento_detalle_tenant_index"
+revision: str = "0002_asiento_tenant_idx"
 down_revision: Union[str, None] = "0001_initial_schema"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
