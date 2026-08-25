@@ -54,7 +54,12 @@ _TABLES_EN_ORDEN_DE_CREACION = [
 
 def upgrade() -> None:
     sql = SCHEMA_SQL_PATH.read_text(encoding="utf-8")
-    op.get_bind().exec_driver_sql(sql)
+    # exec_driver_sql siempre manda un objeto de parametros (vacio) al driver,
+    # y psycopg2 interpreta cualquier "%" suelto del texto como su propio
+    # placeholder. El schema usa "%" legitimo de PL/pgSQL (RAISE EXCEPTION,
+    # format('%I ...')) asi que se escapa como "%%" para que psycopg2 lo
+    # revierta a "%" antes de mandarlo a Postgres.
+    op.get_bind().exec_driver_sql(sql.replace("%", "%%"))
 
 
 def downgrade() -> None:
