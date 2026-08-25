@@ -43,7 +43,12 @@ def test_decode_access_token_rejects_tampered_token():
     tenant_id = uuid.uuid4()
     token = create_access_token(usuario_id=usuario_id, tenant_id=tenant_id, rol="contador")
 
-    tampered = token[:-1] + ("A" if token[-1] != "A" else "B")
+    # Cambiar un caracter en medio del token (no el ultimo): el ultimo
+    # caracter de un bloque base64url puede caer en bits de relleno que no
+    # afectan los bytes decodificados, dando un falso negativo intermitente.
+    mid = len(token) // 2
+    flipped_char = "A" if token[mid] != "A" else "B"
+    tampered = token[:mid] + flipped_char + token[mid + 1 :]
 
     with pytest.raises(jwt.PyJWTError):
         decode_access_token(tampered)
