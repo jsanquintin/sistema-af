@@ -172,7 +172,7 @@ Diagrama de cobertura de tests y plan de pruebas guardado en `~/.gstack/projects
 - [x] **T3** — auth — JWT propio contra `usuarios.hash_password` (argon2 + PyJWT) — `backend/app/core/security.py`, `backend/app/core/deps.py`, `backend/app/api/auth.py`, modelos `backend/app/models/{tenant,usuario}.py`. 13 tests, todos pasan (`backend/tests/test_security.py`, `backend/tests/test_auth_api.py`).
 - [x] **T4** — deps — `pytest` + `httpx` + `email-validator` en `requirements.txt`
 - [ ] **T1** — gate — Sesión contador + verificación DGII (no es tarea de código, pendiente del lado del usuario)
-- [x] **(Nuevo)** Modelos `Empresa` y `Sucursal` (solo estructura, sin lógica) — `backend/app/models/{empresa,sucursal}.py`, reflejando el schema tal cual. Terreno neutral, no depende de ninguna de las 7 incógnitas.
+- [x] **(Nuevo)** Modelos `Empresa`, `Sucursal` y `Almacen` (solo estructura, sin lógica) — `backend/app/models/{empresa,sucursal}.py`, reflejando el schema tal cual. Terreno neutral, no depende de ninguna de las 7 incógnitas.
 - [x] **(Nuevo)** Middleware de tenant fail-closed + rol `app_user` — `backend/scripts/setup_app_role.py`, `backend/app/core/deps.py::get_tenant_db`, `backend/app/db/session.py` (conexión dual owner/app_user), endpoint `GET /plan-cuentas` como primer caso de uso real, 2 tests nuevos (17/17 en total).
 - [ ] **T5** — services — Batch-fetch de `reglas_contabilizacion` (se implementa junto al motor de asientos, no antes)
 - [ ] **T6** — db/services — Validar `sucursal_id` ∈ `empresa_id` del asiento (se implementa junto al motor de asientos)
