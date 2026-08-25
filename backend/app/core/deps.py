@@ -3,10 +3,11 @@ from collections.abc import Generator
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.security import decode_access_token
-from app.db.session import SessionLocal
+from app.db.session import AppSessionLocal, SessionLocal
 from app.models.usuario import Usuario
 
 _bearer_scheme = HTTPBearer()
@@ -46,3 +47,20 @@ def get_current_user(
         raise unauthorized
 
     return usuario
+
+
+def get_tenant_db(usuario: Usuario = Depends(get_current_user)) -> Generator[Session, None, None]:
+    """Sesion de negocio, con RLS forzado por app_user.
+
+    Fail-closed por construccion: fija app.tenant_id ANTES de devolver la
+    sesion, usando el tenant_id ya validado en el JWT (get_current_user).
+    Sin este SET, las politicas RLS con FORCE ROW LEVEL SECURITY hacen
+    current_setting('app.tenant_id') fallar -- cero filas visibles, nunca
+    un tenant por defecto.
+    """
+    db = AppSessionLocal()
+    try:
+        db.execute(text("SELECT set_config('app.tenant_id', :tenant_id, true)"), {"tenant_id": str(usuario.tenant_id)})
+        yield db
+    finally:
+        db.close()
