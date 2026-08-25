@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16
+    container_name: sistema-af-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: af_user
+      POSTGRES_PASSWORD: af_password
+      POSTGRES_DB: sistema_af
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U af_user -d sistema_af"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:
