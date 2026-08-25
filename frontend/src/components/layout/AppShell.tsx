@@ -19,7 +19,7 @@ export function AppShell({ usuario, onLogout, children }: AppShellProps) {
       <Sidebar seccionActiva={seccion} onCambiarSeccion={setSeccion} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-border px-6 py-3">
-          <span className="text-sm font-semibold">sistema-af</span>
+          <span className="font-mono text-sm font-medium tracking-tight">sistema-af</span>
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">
               {usuario.nombre_completo} · {usuario.rol}
