@@ -5,7 +5,7 @@ Revises:
 Create Date: 2026-08-24
 
 Ejecuta tal cual el esquema ya validado contra Postgres 16 real (ver
-CONTEXTO.md / schema_agrocasa_creixa.sql en la raíz del repo) en vez de
+CONTEXTO.md / backend/schema_agrocasa_creixa.sql) en vez de
 reescribirlo como operaciones op.create_table(): ese archivo es la fuente
 de verdad (24 tablas, RLS, trigger de cuadre) y duplicarlo aquí como
 modelos ORM introduciría el riesgo de que las dos copias diverjan antes
@@ -26,8 +26,8 @@ down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-# backend/alembic/versions/0001_initial_schema.py -> versions -> alembic -> backend -> raíz del repo
-SCHEMA_SQL_PATH = Path(__file__).resolve().parents[3] / "schema_agrocasa_creixa.sql"
+# backend/alembic/versions/0001_initial_schema.py -> versions -> alembic -> backend
+SCHEMA_SQL_PATH = Path(__file__).resolve().parents[2] / "schema_agrocasa_creixa.sql"
 
 _TABLES_EN_ORDEN_DE_CREACION = [
     "tenants",
