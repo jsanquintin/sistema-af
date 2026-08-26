@@ -51,11 +51,11 @@
 }
 
 :root {
-    --background: #fafaf9;
+    --background: #f9f8f5;
     --foreground: #1c1a17;
-    --card: #fafaf9;
+    --card: #f9f8f5;
     --card-foreground: #1c1a17;
-    --popover: #fafaf9;
+    --popover: #f9f8f5;
     --popover-foreground: #1c1a17;
     --primary: #B5622A;
     --primary-foreground: oklch(0.985 0 0);
@@ -177,16 +177,16 @@
 @keyframes enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
   }
 }
 
 .animate-enter {
-  animation: enter 220ms ease-out;
+  animation: enter 200ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {

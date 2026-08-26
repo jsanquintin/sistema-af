@@ -25,9 +25,9 @@
 - **Approach:** restrained — 1 acento + neutrales, semánticos fijos.
 - **Primary:** `#B5622A` (cobre quemado) — acento de marca. Deliberadamente no es azul ni verde (lo que usa todo el rubro contable/fintech); nota sutil hacia café/cacao sin volverse ilustrativo.
 - **Secondary:** ninguno — el sistema es de un solo acento, no de primario+secundario.
-- **Neutrals:** grises fríos del preset shadcn/Nova ya instalado (oklch, casi-blanco a casi-negro). Preview usa `#fafaf9`→`#1c1a17` en modo claro, `#16140f`→`#f2efe9` en oscuro.
+- **Neutrals:** grises fríos del preset shadcn/Nova ya instalado (oklch, casi-blanco a casi-negro). Preview usa `#f9f8f5`→`#1c1a17` en modo claro, `#16140f`→`#f2efe9` en oscuro. (Cambiado de `#fafaf9` — casi idéntico al fondo claro de Torquéalo/Mecanix, `#fafafa`; ambos proyectos deben quedar sin parentesco visual.)
 - **Semantic:** éxito `#1f7a3f`, error `#b3261e`, advertencia `#a3690a` — verde/rojo/ámbar estándar, no se experimenta aquí: en software financiero romper esta convención genera desconfianza, no personalidad.
-- **Dark mode:** el preset shadcn/Nova ya trae modo oscuro completo; el acento se aclara a `#e08347` en oscuro para mantener contraste (WCAG AA sobre fondo oscuro).
+- **Dark mode:** el preset shadcn/Nova ya trae modo oscuro completo; el acento se aclara a `#e08347` en oscuro para mantener contraste (WCAG AA sobre fondo oscuro). **Es el modo por defecto** (feedback: la versión clara se sentía "seca"; el acento cobre respira mejor sobre fondo oscuro). El `--card` es una superficie distinta y más clara que `--background` (`#211d17` en oscuro), no plana — da profundidad real en vez de un solo tono con borde.
 
 ## Spacing
 - **Base unit:** 8px.
