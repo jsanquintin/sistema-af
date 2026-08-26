@@ -1,4 +1,4 @@
-import { BookOpen, Boxes, ReceiptText, Settings, Users } from 'lucide-react'
+import { BookOpen, Boxes, LayoutDashboard, ReceiptText, Settings, Users } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 
 import type { Empresa, Sucursal } from '@/lib/api'
@@ -108,6 +108,21 @@ export function Sidebar({ empresa, sucursal, onCambiarEmpresa, open, onClose }: 
             </Link>
           </div>
         </div>
+
+        <NavLink
+          to="/dashboard"
+          onClick={onClose}
+          className={({ isActive }) =>
+            `flex cursor-pointer items-center gap-1.5 rounded-lg border-l-2 py-1.5 pr-2 pl-4 text-left text-sm transition-colors ${
+              isActive
+                ? 'border-l-primary bg-primary/15 font-medium text-primary'
+                : 'border-l-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
+            }`
+          }
+        >
+          <LayoutDashboard className="size-3.5" />
+          Dashboard
+        </NavLink>
 
         {modulos.map(({ id, label, icon: Icon, items }) => (
           <div key={id}>

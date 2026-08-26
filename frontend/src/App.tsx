@@ -8,6 +8,7 @@ import { AlmacenesPage } from '@/pages/AlmacenesPage'
 import { AsientosPage } from '@/pages/AsientosPage'
 import { ClientesPage } from '@/pages/ClientesPage'
 import { ConfiguracionEmpresasPage } from '@/pages/ConfiguracionEmpresasPage'
+import { DashboardPage } from '@/pages/DashboardPage'
 import { EmpleadosPage } from '@/pages/EmpleadosPage'
 import { FacturasPage } from '@/pages/FacturasPage'
 import { InventarioMovimientosPage } from '@/pages/InventarioMovimientosPage'
@@ -145,7 +146,7 @@ function App() {
         path="/login"
         element={
           token ? (
-            <Navigate to="/contabilidad/plan-cuentas" replace />
+            <Navigate to="/dashboard" replace />
           ) : (
             <LoginPage onLoginSuccess={handleLoginSuccess} />
           )
@@ -157,7 +158,7 @@ function App() {
           !token ? (
             <Navigate to="/login" replace />
           ) : empresa ? (
-            <Navigate to="/contabilidad/plan-cuentas" replace />
+            <Navigate to="/dashboard" replace />
           ) : (
             <SeleccionarEmpresaPage token={token} onSeleccionado={handleSeleccionEmpresa} />
           )
@@ -184,7 +185,11 @@ function App() {
           )
         }
       >
-        <Route path="/" element={<Navigate to="/contabilidad/plan-cuentas" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route
+          path="/dashboard"
+          element={token && empresa && <DashboardPage token={token} empresaId={empresa.id} />}
+        />
         <Route path="/contabilidad" element={<Navigate to="/contabilidad/plan-cuentas" replace />} />
         <Route
           path="/contabilidad/plan-cuentas"
