@@ -28,7 +28,7 @@ def test_import_inserts_one_plancuenta_per_row(tmp_path, monkeypatch):
     with patch("scripts.import_plan_cuentas.SessionLocal", return_value=fake_db):
         monkeypatch.setattr(
             "sys.argv",
-            ["import_plan_cuentas", "--tenant-id", str(tenant_id), "--csv", str(csv_path)],
+            ["import_plan_cuentas", "--tenant-id", str(tenant_id), "--empresa-id", "1", "--csv", str(csv_path)],
         )
         main()
 
@@ -36,6 +36,7 @@ def test_import_inserts_one_plancuenta_per_row(tmp_path, monkeypatch):
     first_cuenta = fake_db.add.call_args_list[0].args[0]
     assert first_cuenta.numero_cta == "10000000"
     assert first_cuenta.tenant_id == tenant_id
+    assert first_cuenta.empresa_id == 1
     assert first_cuenta.nivel == 1
     fake_db.commit.assert_called_once()
     fake_db.close.assert_called_once()
@@ -52,7 +53,7 @@ def test_import_strips_whitespace_from_numero_cta_and_nombre(tmp_path, monkeypat
     with patch("scripts.import_plan_cuentas.SessionLocal", return_value=fake_db):
         monkeypatch.setattr(
             "sys.argv",
-            ["import_plan_cuentas", "--tenant-id", str(tenant_id), "--csv", str(csv_path)],
+            ["import_plan_cuentas", "--tenant-id", str(tenant_id), "--empresa-id", "1", "--csv", str(csv_path)],
         )
         main()
 

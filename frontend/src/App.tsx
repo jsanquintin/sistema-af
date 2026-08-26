@@ -4,13 +4,17 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { getEmpresas, getMe, getSucursales, type Empresa, type Sucursal, type Usuario } from '@/lib/api'
 import { AlmacenesPage } from '@/pages/AlmacenesPage'
+import { AsientosPage } from '@/pages/AsientosPage'
 import { ClientesPage } from '@/pages/ClientesPage'
 import { ConfiguracionEmpresasPage } from '@/pages/ConfiguracionEmpresasPage'
 import { EmpleadosPage } from '@/pages/EmpleadosPage'
+import { FacturasPage } from '@/pages/FacturasPage'
 import { InventarioMovimientosPage } from '@/pages/InventarioMovimientosPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { LotesCosechaPage } from '@/pages/LotesCosechaPage'
+import { NominaCorridasPage } from '@/pages/NominaCorridasPage'
 import { PlanCuentasPage } from '@/pages/PlanCuentasPage'
+import { ReportesPage } from '@/pages/ReportesPage'
 import { SeccionPlaceholder } from '@/pages/SeccionPlaceholder'
 import { SeleccionarEmpresaPage } from '@/pages/SeleccionarEmpresaPage'
 
@@ -18,34 +22,12 @@ const TOKEN_STORAGE_KEY = 'sistema-af.token'
 const EMPRESA_STORAGE_KEY = 'sistema-af.empresaId'
 const SUCURSAL_STORAGE_KEY = 'sistema-af.sucursalId'
 
-// Secciones sin motor de negocio todavia. Dos categorias, no las mezclamos:
-// "bloqueado" depende de una respuesta pendiente del contador (no es tarea
-// de codigo); las demas simplemente no se han construido todavia pero no
-// tienen ningun gate de negocio -- son el proximo trabajo natural.
-const PLACEHOLDERS: { path: string; titulo: string; descripcion: string }[] = [
-  {
-    path: '/contabilidad/asientos',
-    titulo: 'Asientos',
-    descripcion:
-      'Bloqueado: el motor de asientos está diseñado pero depende de preguntas pendientes con el contador (numeración de comprobantes, saldo de apertura). Ver docs/designs/nucleo-contabilidad-nomina.md.',
-  },
-  {
-    path: '/contabilidad/reportes',
-    titulo: 'Reportes',
-    descripcion: 'Bloqueado: depende de que existan asientos reales primero.',
-  },
-  {
-    path: '/nomina/corridas',
-    titulo: 'Nóminas',
-    descripcion:
-      'Bloqueado: si la nómina es compartida o separada entre Agrocasa y Creixa, y las tablas de ISR/TSS, aún no están confirmadas.',
-  },
-  {
-    path: '/facturacion/facturas',
-    titulo: 'Facturas',
-    descripcion: 'Bloqueado: falta confirmar si e-CF es obligación legal activa para Agrocasa.',
-  },
-]
+// Secciones sin motor de negocio todavia. El gate de "The Assignment" que
+// bloqueaba asientos/reportes/nominas/facturas fue levantado por decision
+// explicita del dueno (Resolucion experta de Open Questions, 2026-08-26,
+// ver docs/designs/nucleo-contabilidad-nomina.md) -- ya no quedan
+// secciones bloqueadas por ese motivo.
+const PLACEHOLDERS: { path: string; titulo: string; descripcion: string }[] = []
 
 // Resuelve la empresa/sucursal activa sin molestar al usuario cuando la
 // respuesta es obvia: una sola empresa, o una sola sucursal, se auto-elige.
@@ -200,16 +182,35 @@ function App() {
       >
         <Route path="/" element={<Navigate to="/contabilidad/plan-cuentas" replace />} />
         <Route path="/contabilidad" element={<Navigate to="/contabilidad/plan-cuentas" replace />} />
-        <Route path="/contabilidad/plan-cuentas" element={token && <PlanCuentasPage token={token} />} />
+        <Route
+          path="/contabilidad/plan-cuentas"
+          element={token && empresa && <PlanCuentasPage token={token} empresaId={empresa.id} />}
+        />
+        <Route
+          path="/contabilidad/asientos"
+          element={token && empresa && <AsientosPage token={token} empresaId={empresa.id} />}
+        />
+        <Route
+          path="/contabilidad/reportes"
+          element={token && empresa && <ReportesPage token={token} empresaId={empresa.id} />}
+        />
         <Route path="/nomina" element={<Navigate to="/nomina/empleados" replace />} />
         <Route
           path="/nomina/empleados"
           element={token && empresa && <EmpleadosPage token={token} empresaId={empresa.id} />}
         />
+        <Route
+          path="/nomina/corridas"
+          element={token && empresa && <NominaCorridasPage token={token} empresaId={empresa.id} />}
+        />
         <Route path="/facturacion" element={<Navigate to="/facturacion/clientes" replace />} />
         <Route
           path="/facturacion/clientes"
           element={token && empresa && <ClientesPage token={token} empresaId={empresa.id} />}
+        />
+        <Route
+          path="/facturacion/facturas"
+          element={token && empresa && <FacturasPage token={token} empresaId={empresa.id} />}
         />
         <Route path="/inventario" element={<Navigate to="/inventario/almacenes" replace />} />
         <Route

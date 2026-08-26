@@ -20,8 +20,10 @@ facturación e inventario — todos con la misma prioridad.
 
 ## Archivos que acompañan este documento
 - `schema_agrocasa_creixa.sql` — esquema completo, validado corriendo
-  contra Postgres 16 real (24 tablas, RLS probado con dos tenants,
-  trigger de cuadre de asientos). Punto de partida del repo.
+  contra Postgres 16 real (19 tablas — corregido, el conteo de "24" de
+  una version anterior de este documento no coincidia con los `CREATE
+  TABLE` reales del archivo — RLS probado con dos tenants, trigger de
+  cuadre de asientos). Punto de partida del repo.
 - `catalogo_cuentas_agrocasa.csv` — catálogo real de 1400 cuentas
   exportado de la base Soluflex de Agrocasa. Se carga tal cual en
   `plan_cuentas`; el cliente lo depura después, no se reinterpreta.
@@ -41,18 +43,17 @@ facturación e inventario — todos con la misma prioridad.
    Soluflex (Ocoa, Rancho Arriba, Santo Domingo) que ya representaba
    la misma entidad usada como centro de costo contable.
 
-## Pendiente sin cerrar — BLOQUEA una parte del modelo de nómina
-**Falta la respuesta del cliente**: ¿la nómina es compartida entre
-Agrocasa y Creixa (un empleado puede trabajar y cobrar cruzando ambas
-empresas) o es completamente separada por empresa?
-
-El esquema ya quedó diseñado para no romper con cualquier respuesta:
-`empleados.empresa_id` es la empresa base del empleado, y
-`nomina_detalle.sucursal_id` ya permite prorratear el costo por
-sucursal/finca. Si el cliente confirma que la nómina es compartida
-entre empresas, hace falta agregar una tabla puente
-`empleados_empresas` (N:M) — no se ha creado todavía porque depende de
-esa respuesta.
+## Resuelto (2026-08-26) — nómina separada por empresa
+**Ya no es una pregunta abierta.** Ver
+`docs/designs/nucleo-contabilidad-nomina.md`, sección "Resolución
+experta de Open Questions": la nómina es **separada por empresa**, no
+compartida. Agrocasa y Creixa son entidades legales distintas (RNC
+propio, registro TSS propio); cada `empleado` pertenece a una sola
+`empresa_id` (ya es como está construido el schema — no requirió
+cambio). Si una persona trabaja para ambas, se modela como dos filas de
+`empleados` separadas, no como una nómina compartida. La tabla puente
+`empleados_empresas` (N:M) que este documento dejaba como posibilidad
+**no se construye** — quedó descartada, no pendiente.
 
 ## Hallazgos de la base histórica de Soluflex (para no reinterpretar)
 - 1400 cuentas contables, patrón de asiento vía tabla `DETCONT`

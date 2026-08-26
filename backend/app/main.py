@@ -3,13 +3,19 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import (
     almacenes,
+    asientos,
     auth,
     clientes,
     empleados,
     empresas,
+    facturas,
     inventario_movimientos,
     lotes_cosecha,
+    nomina,
+    parametros_nomina,
     plan_cuentas,
+    reglas_contabilizacion,
+    reportes,
 )
 from app.core.config import settings
 
@@ -31,6 +37,12 @@ app.include_router(clientes.router)
 app.include_router(almacenes.router)
 app.include_router(lotes_cosecha.router)
 app.include_router(inventario_movimientos.router)
+app.include_router(asientos.router)
+app.include_router(reglas_contabilizacion.router)
+app.include_router(nomina.router)
+app.include_router(facturas.router)
+app.include_router(reportes.router)
+app.include_router(parametros_nomina.router)
 
 
 @app.get("/health")

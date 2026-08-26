@@ -2,17 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.acceso import verificar_acceso_empresa
 from app.core.deps import get_current_user, get_tenant_db
 from app.models.empleado import Empleado
 from app.models.usuario import Usuario
 from app.schemas.empleado import EmpleadoCreate, EmpleadoResponse
 
 router = APIRouter(prefix="/empleados", tags=["empleados"])
-
-
-def _verificar_acceso_empresa(usuario: Usuario, empresa_id: int) -> None:
-    if usuario.empresa_id is not None and usuario.empresa_id != empresa_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes acceso a esta empresa")
 
 
 @router.get("", response_model=list[EmpleadoResponse])
@@ -32,7 +28,7 @@ def crear_empleado(
     usuario: Usuario = Depends(get_current_user),
     db: Session = Depends(get_tenant_db),
 ) -> Empleado:
-    _verificar_acceso_empresa(usuario, payload.empresa_id)
+    verificar_acceso_empresa(usuario, payload.empresa_id)
     empleado = Empleado(**payload.model_dump(), tenant_id=usuario.tenant_id, activo=True)
     db.add(empleado)
     db.commit()
@@ -50,8 +46,8 @@ def actualizar_empleado(
     empleado = db.get(Empleado, empleado_id)
     if empleado is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Empleado no encontrado")
-    _verificar_acceso_empresa(usuario, empleado.empresa_id)
-    _verificar_acceso_empresa(usuario, payload.empresa_id)
+    verificar_acceso_empresa(usuario, empleado.empresa_id)
+    verificar_acceso_empresa(usuario, payload.empresa_id)
 
     for campo, valor in payload.model_dump().items():
         setattr(empleado, campo, valor)
@@ -69,7 +65,7 @@ def desactivar_empleado(
     empleado = db.get(Empleado, empleado_id)
     if empleado is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Empleado no encontrado")
-    _verificar_acceso_empresa(usuario, empleado.empresa_id)
+    verificar_acceso_empresa(usuario, empleado.empresa_id)
 
     # Soft-delete (activo=false), no borrado real -- un empleado con
     # historial de nomina no puede desaparecer del registro.

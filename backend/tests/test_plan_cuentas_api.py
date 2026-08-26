@@ -27,6 +27,7 @@ def test_listar_plan_cuentas_fija_tenant_antes_de_consultar():
     cuenta = PlanCuenta(
         id=1,
         tenant_id=usuario.tenant_id,
+        empresa_id=11,
         numero_cta="10000000",
         nivel=1,
         tipo_cta=1,
@@ -40,12 +41,20 @@ def test_listar_plan_cuentas_fija_tenant_antes_de_consultar():
     app.dependency_overrides[get_current_user] = lambda: usuario
     with patch("app.core.deps.AppSessionLocal", return_value=fake_app_session):
         client = TestClient(app)
-        response = client.get("/plan-cuentas")
+        response = client.get("/plan-cuentas", params={"empresa_id": 11})
     app.dependency_overrides.clear()
 
     assert response.status_code == 200
     assert response.json() == [
-        {"id": 1, "numero_cta": "10000000", "nivel": 1, "tipo_cta": 1, "nombre": "Activos", "activo": True}
+        {
+            "id": 1,
+            "empresa_id": 11,
+            "numero_cta": "10000000",
+            "nivel": 1,
+            "tipo_cta": 1,
+            "nombre": "Activos",
+            "activo": True,
+        }
     ]
 
     # La primera llamada a execute debe ser el set_config del tenant --

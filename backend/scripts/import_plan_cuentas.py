@@ -7,7 +7,11 @@ antes de considerarse definitivo. No reinterpreta la jerarquia del CSV,
 la carga tal cual (decision ya tomada en CONTEXTO.md).
 
 Uso:
-    python -m scripts.import_plan_cuentas --tenant-id <uuid> --csv ../catalogo_cuentas_agrocasa.csv
+    python -m scripts.import_plan_cuentas --tenant-id <uuid> --empresa-id <id> --csv ../catalogo_cuentas_agrocasa.csv
+
+--empresa-id es obligatorio desde la Resolucion experta de Open Question 5
+(docs/designs/nucleo-contabilidad-nomina.md): el catalogo es por empresa,
+no solo por tenant -- Agrocasa y Creixa ya no comparten numeracion.
 """
 import argparse
 import csv
@@ -21,6 +25,7 @@ from app.models.plan_cuenta import PlanCuenta
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tenant-id", required=True, type=uuid.UUID)
+    parser.add_argument("--empresa-id", required=True, type=int)
     parser.add_argument("--csv", required=True, type=Path)
     args = parser.parse_args()
 
@@ -33,6 +38,7 @@ def main() -> None:
         for row in rows:
             cuenta = PlanCuenta(
                 tenant_id=args.tenant_id,
+                empresa_id=args.empresa_id,
                 numero_cta=row["numero_cta"].strip(),
                 nivel=int(row["nivel"]),
                 tipo_cta=int(row["tipo_cta"]),
@@ -42,7 +48,7 @@ def main() -> None:
             db.add(cuenta)
             insertadas += 1
         db.commit()
-        print(f"{insertadas} cuentas importadas para tenant {args.tenant_id}")
+        print(f"{insertadas} cuentas importadas para tenant {args.tenant_id}, empresa {args.empresa_id}")
     finally:
         db.close()
 

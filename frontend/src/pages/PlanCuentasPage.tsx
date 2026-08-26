@@ -5,6 +5,7 @@ import { ApiError, getPlanCuentas, type PlanCuenta } from '@/lib/api'
 
 interface PlanCuentasPageProps {
   token: string
+  empresaId: number
 }
 
 // Verificado contra los niveles 1 (raiz) del catalogo real
@@ -18,16 +19,17 @@ const TIPO_LABEL: Record<number, string> = {
   6: 'Gastos',
 }
 
-export function PlanCuentasPage({ token }: PlanCuentasPageProps) {
+export function PlanCuentasPage({ token, empresaId }: PlanCuentasPageProps) {
   const [cuentas, setCuentas] = useState<PlanCuenta[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busqueda, setBusqueda] = useState('')
 
   useEffect(() => {
-    getPlanCuentas(token)
+    setCuentas(null)
+    getPlanCuentas(token, empresaId)
       .then(setCuentas)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'No se pudo cargar el plan de cuentas'))
-  }, [token])
+  }, [token, empresaId])
 
   const filtradas = useMemo(() => {
     if (!cuentas) return []

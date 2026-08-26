@@ -13,12 +13,6 @@ class InventarioMovimiento(Base):
     app/api/inventario_movimientos.py: no hay UPDATE ni DELETE, una
     correccion se hace con un movimiento contrario, igual que en
     contabilidad real).
-
-    asiento_id (columna real en la tabla, ver schema_agrocasa_creixa.sql)
-    no se mapea aqui: lo llenaria el motor de asientos, que todavia no
-    existe como modelo -- declarar el FK contra una tabla sin mapear
-    rompe la resolucion de SQLAlchemy. La columna se queda NULL via el
-    default de Postgres hasta que ese motor exista.
     """
 
     __tablename__ = "inventario_movimientos"
@@ -38,3 +32,4 @@ class InventarioMovimiento(Base):
     cantidad: Mapped[float] = mapped_column(Numeric(14, 2), nullable=False)
     referencia_doc: Mapped[str | None] = mapped_column(String(50), nullable=True)
     fecha: Mapped[date] = mapped_column(Date, nullable=False)
+    asiento_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("asientos.id"), nullable=True)
