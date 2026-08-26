@@ -6,16 +6,20 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
 import { ApiError, login } from '@/lib/api'
+
+const EMAIL_RECORDADO_KEY = 'sistema-af.emailRecordado'
 
 interface LoginPageProps {
   onLoginSuccess: (token: string) => void
 }
 
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(() => localStorage.getItem(EMAIL_RECORDADO_KEY) ?? '')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [recordarme, setRecordarme] = useState(() => localStorage.getItem(EMAIL_RECORDADO_KEY) !== null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -25,6 +29,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     setLoading(true)
     try {
       const { access_token } = await login(email, password)
+      // Nunca se guarda la contrasena aqui -- eso lo maneja el gestor de
+      // contrasenas nativo del navegador via los autoComplete de abajo.
+      // Recordarme solo evita re-escribir el email en cada sesion.
+      if (recordarme) localStorage.setItem(EMAIL_RECORDADO_KEY, email)
+      else localStorage.removeItem(EMAIL_RECORDADO_KEY)
       onLoginSuccess(access_token)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Error de conexión con el servidor')
@@ -60,19 +69,37 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                   id="email"
                   type="email"
                   autoComplete="username"
+                  autoFocus
                   required
+                  disabled={loading}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="password">Contraseña</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Contraseña</Label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      toast({
+                        variant: 'default',
+                        title: 'Recuperación de contraseña',
+                        description: 'Por ahora, contacta al administrador del sistema para restablecer tu contraseña.',
+                      })
+                    }
+                    className="cursor-pointer text-xs text-primary hover:underline"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
                     required
+                    disabled={loading}
                     className="pr-8"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -87,6 +114,18 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                   </button>
                 </div>
               </div>
+              <div className="flex items-center gap-2">
+                <input
+                  id="recordarme"
+                  type="checkbox"
+                  checked={recordarme}
+                  onChange={(e) => setRecordarme(e.target.checked)}
+                  className="size-4 cursor-pointer accent-primary"
+                />
+                <Label htmlFor="recordarme" className="cursor-pointer font-normal text-muted-foreground">
+                  Recordar mi usuario
+                </Label>
+              </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <Button type="submit" disabled={loading}>
                 {loading ? 'Ingresando…' : 'Ingresar'}
@@ -94,6 +133,9 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             </form>
           </CardContent>
         </Card>
+        <p className="mt-6 text-center text-xs text-muted-foreground/70">
+          Desarrollado por <span className="font-medium text-muted-foreground">GlobalServiplus</span>
+        </p>
       </div>
     </div>
   )
