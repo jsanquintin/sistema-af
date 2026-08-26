@@ -3,8 +3,13 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppShell } from '@/components/layout/AppShell'
 import { getEmpresas, getMe, getSucursales, type Empresa, type Sucursal, type Usuario } from '@/lib/api'
+import { AlmacenesPage } from '@/pages/AlmacenesPage'
+import { ClientesPage } from '@/pages/ClientesPage'
 import { ConfiguracionEmpresasPage } from '@/pages/ConfiguracionEmpresasPage'
+import { EmpleadosPage } from '@/pages/EmpleadosPage'
+import { InventarioMovimientosPage } from '@/pages/InventarioMovimientosPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { LotesCosechaPage } from '@/pages/LotesCosechaPage'
 import { PlanCuentasPage } from '@/pages/PlanCuentasPage'
 import { SeccionPlaceholder } from '@/pages/SeccionPlaceholder'
 import { SeleccionarEmpresaPage } from '@/pages/SeleccionarEmpresaPage'
@@ -30,41 +35,15 @@ const PLACEHOLDERS: { path: string; titulo: string; descripcion: string }[] = [
     descripcion: 'Bloqueado: depende de que existan asientos reales primero.',
   },
   {
-    path: '/nomina/empleados',
-    titulo: 'Empleados',
-    descripcion: 'Diseñado, pendiente de construir — no bloqueado por el contador.',
-  },
-  {
     path: '/nomina/corridas',
     titulo: 'Nóminas',
     descripcion:
       'Bloqueado: si la nómina es compartida o separada entre Agrocasa y Creixa, y las tablas de ISR/TSS, aún no están confirmadas.',
   },
   {
-    path: '/facturacion/clientes',
-    titulo: 'Clientes',
-    descripcion: 'Diseñado, pendiente de construir — no bloqueado por el contador.',
-  },
-  {
     path: '/facturacion/facturas',
     titulo: 'Facturas',
     descripcion: 'Bloqueado: falta confirmar si e-CF es obligación legal activa para Agrocasa.',
-  },
-  {
-    path: '/inventario/almacenes',
-    titulo: 'Almacenes',
-    descripcion: 'Diseñado, pendiente de construir — no bloqueado por el contador.',
-  },
-  {
-    path: '/inventario/movimientos',
-    titulo: 'Movimientos',
-    descripcion: 'Diseñado, pendiente de construir — no bloqueado por el contador.',
-  },
-  {
-    path: '/inventario/lotes',
-    titulo: 'Lotes de Cosecha',
-    descripcion:
-      'Diseñado, pendiente de construir — no bloqueado por el contador. Sin datos históricos que migrar.',
   },
 ]
 
@@ -223,8 +202,28 @@ function App() {
         <Route path="/contabilidad" element={<Navigate to="/contabilidad/plan-cuentas" replace />} />
         <Route path="/contabilidad/plan-cuentas" element={token && <PlanCuentasPage token={token} />} />
         <Route path="/nomina" element={<Navigate to="/nomina/empleados" replace />} />
+        <Route
+          path="/nomina/empleados"
+          element={token && empresa && <EmpleadosPage token={token} empresaId={empresa.id} />}
+        />
         <Route path="/facturacion" element={<Navigate to="/facturacion/clientes" replace />} />
+        <Route
+          path="/facturacion/clientes"
+          element={token && empresa && <ClientesPage token={token} empresaId={empresa.id} />}
+        />
         <Route path="/inventario" element={<Navigate to="/inventario/almacenes" replace />} />
+        <Route
+          path="/inventario/almacenes"
+          element={token && empresa && <AlmacenesPage token={token} empresaId={empresa.id} />}
+        />
+        <Route
+          path="/inventario/lotes"
+          element={token && empresa && <LotesCosechaPage token={token} empresaId={empresa.id} />}
+        />
+        <Route
+          path="/inventario/movimientos"
+          element={token && <InventarioMovimientosPage token={token} />}
+        />
         <Route path="/configuracion" element={<Navigate to="/configuracion/empresas" replace />} />
         <Route
           path="/configuracion/empresas"

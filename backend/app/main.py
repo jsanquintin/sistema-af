@@ -1,7 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, empresas, plan_cuentas
+from app.api import (
+    almacenes,
+    auth,
+    clientes,
+    empleados,
+    empresas,
+    inventario_movimientos,
+    lotes_cosecha,
+    plan_cuentas,
+)
 from app.core.config import settings
 
 app = FastAPI(title="sistema-af")
@@ -17,6 +26,11 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(empresas.router)
 app.include_router(plan_cuentas.router)
+app.include_router(empleados.router)
+app.include_router(clientes.router)
+app.include_router(almacenes.router)
+app.include_router(lotes_cosecha.router)
+app.include_router(inventario_movimientos.router)
 
 
 @app.get("/health")
