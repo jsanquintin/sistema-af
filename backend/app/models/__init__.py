@@ -7,6 +7,7 @@ from app.models.factura import Factura, FacturaDetalle
 from app.models.inventario_movimiento import InventarioMovimiento
 from app.models.lote_cosecha import LoteCosecha
 from app.models.nomina import NominaCorrida, NominaDetalle
+from app.models.obra import Obra
 from app.models.parametro_nomina import ParametroNomina
 from app.models.plan_cuenta import PlanCuenta
 from app.models.regla_contabilizacion import ReglaContabilizacion
@@ -28,6 +29,7 @@ __all__ = [
     "LoteCosecha",
     "NominaCorrida",
     "NominaDetalle",
+    "Obra",
     "ParametroNomina",
     "PlanCuenta",
     "ReglaContabilizacion",

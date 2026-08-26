@@ -30,6 +30,7 @@ def _con_lineas(db: Session, factura: Factura) -> FacturaResponse:
         total=factura.total,
         estado_ecf=factura.estado_ecf,
         lote_id=factura.lote_id,
+        obra_id=factura.obra_id,
         asiento_id=factura.asiento_id,
         lineas=[FacturaDetalleResponse.model_validate(l) for l in lineas],
     )

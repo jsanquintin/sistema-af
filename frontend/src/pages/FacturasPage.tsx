@@ -9,11 +9,13 @@ import {
   getClientes,
   getFacturas,
   getLotesCosecha,
+  getObras,
   getSucursales,
   type Cliente,
   type Factura,
   type FacturaDetalleInput,
   type LoteCosecha,
+  type Obra,
   type Sucursal,
 } from '@/lib/api'
 
@@ -39,6 +41,7 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [sucursales, setSucursales] = useState<Sucursal[]>([])
   const [lotes, setLotes] = useState<LoteCosecha[]>([])
+  const [obras, setObras] = useState<Obra[]>([])
   const [error, setError] = useState<string | null>(null)
   const [mostrarForm, setMostrarForm] = useState(false)
   const [guardando, setGuardando] = useState(false)
@@ -48,6 +51,7 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
   const [tipoFactura, setTipoFactura] = useState<'local' | 'exportacion'>('local')
   const [fechaEmision, setFechaEmision] = useState('')
   const [loteId, setLoteId] = useState('')
+  const [obraId, setObraId] = useState('')
   const [lineas, setLineas] = useState<FacturaDetalleInput[]>([{ ...LINEA_VACIA }])
 
   function cargar() {
@@ -64,6 +68,7 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
     getClientes(token).then((todos) => setClientes(todos.filter((c) => c.empresa_id === empresaId))).catch(() => setClientes([]))
     getSucursales(token, empresaId).then(setSucursales).catch(() => setSucursales([]))
     getLotesCosecha(token).then((todos) => setLotes(todos.filter((l) => l.estado === 'disponible'))).catch(() => setLotes([]))
+    getObras(token, empresaId).then((todas) => setObras(todas.filter((o) => o.estado === 'en_proceso'))).catch(() => setObras([]))
   }, [token, empresaId])
 
   function abrirNuevo() {
@@ -72,6 +77,7 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
     setTipoFactura('local')
     setFechaEmision('')
     setLoteId('')
+    setObraId('')
     setLineas([{ ...LINEA_VACIA }])
     setMostrarForm(true)
   }
@@ -96,6 +102,7 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
         fecha_emision: fechaEmision,
         moneda: tipoFactura === 'exportacion' ? 'USD' : 'DOP',
         lote_id: loteId ? Number(loteId) : null,
+        obra_id: obraId ? Number(obraId) : null,
         lineas: lineas.filter((l) => l.descripcion && l.cantidad > 0),
       })
       setMostrarForm(false)
@@ -186,10 +193,16 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
                 onChange={(e) => setFechaEmision(e.target.value)}
               />
             </div>
-            <div className="col-span-2 flex flex-col gap-1.5">
-              <Label htmlFor="lote_id">Lote de cosecha (opcional — genera salida de inventario)</Label>
-              <select id="lote_id" className={selectClassName} value={loteId} onChange={(e) => setLoteId(e.target.value)}>
-                <option value="">Sin lote (servicio o no aplica)</option>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="lote_id">Lote de cosecha (genera salida de inventario)</Label>
+              <select
+                id="lote_id"
+                className={selectClassName}
+                value={loteId}
+                disabled={obraId !== ''}
+                onChange={(e) => setLoteId(e.target.value)}
+              >
+                <option value="">Sin lote</option>
                 {lotes.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.producto} — {l.fecha_cosecha} ({l.cantidad} {l.unidad})
@@ -197,7 +210,29 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
                 ))}
               </select>
             </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="obra_id">Obra (reconoce costo incurrido desde la última factura)</Label>
+              <select
+                id="obra_id"
+                className={selectClassName}
+                value={obraId}
+                disabled={loteId !== ''}
+                onChange={(e) => setObraId(e.target.value)}
+              >
+                <option value="">Sin obra</option>
+                {obras.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.codigo} — {o.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+          {lotes.length === 0 && obras.length === 0 && (
+            <p className="text-xs text-muted-foreground">
+              Sin lote ni obra: factura de servicio, no genera salida de inventario ni costo de venta automático.
+            </p>
+          )}
 
           <div className="flex flex-col gap-2">
             {lineas.map((linea, i) => (

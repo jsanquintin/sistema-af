@@ -1,7 +1,7 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import Boolean, ForeignKey, Integer, Numeric, String
+from sqlalchemy import Boolean, CheckConstraint, ForeignKey, Integer, Numeric, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -10,6 +10,13 @@ from app.db.base import Base
 
 class NominaCorrida(Base):
     __tablename__ = "nomina_corridas"
+    __table_args__ = (
+        CheckConstraint("costeable_tipo IN ('lote','obra')", name="nomina_corridas_costeable_tipo_check"),
+        CheckConstraint(
+            "(costeable_tipo IS NULL) = (costeable_id IS NULL)",
+            name="nomina_corridas_costeable_check",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     tenant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
@@ -22,6 +29,13 @@ class NominaCorrida(Base):
     incluye_tss: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     cerrada: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     asiento_id: Mapped[int | None] = mapped_column(ForeignKey("asientos.id"), nullable=True)
+    # Sin FK real a proposito -- polimorfico segun costeable_tipo (lotes_cosecha
+    # u obras), mismo patron que asientos.origen_id en el schema original.
+    # El costo de mano de obra de la corrida se acumula aqui al cerrarla
+    # (ver app/api/nomina.py::cerrar_corrida) -- toda la corrida a un solo
+    # costeable, sin prorrateo por linea.
+    costeable_tipo: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    costeable_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class NominaDetalle(Base):

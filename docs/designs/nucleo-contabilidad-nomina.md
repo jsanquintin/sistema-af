@@ -171,15 +171,16 @@ COMMIT ──▶ trg_cuadre_asiento valida debe=haber (última red de seguridad,
            no la primera línea de defensa)
 ```
 
-## Integración diferida: Facturación/Inventario, para cuando se desbloqueen
+## Integración Facturación/Nómina/Inventario (construida 2026-08-26)
 
-Ya anticipada en el schema (`schema_agrocasa_creixa.sql:377-382`, NOTAS DE DISEÑO): "asientos/asiento_detalle es el único punto de escritura contable. Nómina, facturación e inventario **NO** escriben en plan_cuentas directamente: generan sus filas y el backend arma el asiento vía `reglas_contabilizacion`." El diagrama de arriba solo cubre nómina→contabilidad porque es lo único dentro de v1; cuando Facturación e Inventario salgan de "Fuera de v1", el mismo motor debe cubrir además:
+Ya anticipada en el schema (`schema_agrocasa_creixa.sql:377-382`, NOTAS DE DISEÑO): "asientos/asiento_detalle es el único punto de escritura contable. Nómina, facturación e inventario **NO** escriben en plan_cuentas directamente: generan sus filas y el backend arma el asiento vía `reglas_contabilizacion`." El diagrama de arriba solo cubre nómina→contabilidad porque era lo único dentro del v1 original; tras la decisión del dueño de levantar el gate de "The Assignment" (ver "Resolución experta de Open Questions") se construyó todo lo siguiente:
 
-- **Facturación → Inventario**: emitir una factura de venta física (café/cacao) debe generar automáticamente un `inventario_movimientos` tipo `salida` contra el lote correspondiente — no una acción manual aparte del usuario.
-- **Facturación → Contabilidad**: cada factura, vía `reglas_contabilizacion`, genera su asiento (venta, costo de venta, ITBIS si aplica).
-- **Nómina → Inventario**: `lotes_cosecha.costo_acumulado` está diseñado para llenarse desde `nomina_detalle` por finca (columna comentada así en el schema) — el costo de mano de obra de cosecha se acumula sobre el lote específico.
+- **Facturación → Inventario**: emitir una factura con `lote_id` genera automáticamente un `inventario_movimientos` tipo `salida` contra ese lote (`app/services/facturacion.py`) — no es una acción manual aparte.
+- **Facturación → Contabilidad**: cada factura, vía `reglas_contabilizacion`, genera su asiento (venta, costo de venta si aplica, ITBIS).
+- **Nómina → Inventario/Costeo**: al cerrar una corrida, si tiene un `costeable_tipo`/`costeable_id` asignado (`nomina_corridas`, opcional), se suma el `monto_bruto` de TODAS sus líneas al `costo_acumulado` del lote u obra asignado (`app/api/nomina.py::cerrar_corrida`) — cierra el hueco que esta sección señalaba como pendiente, y que en la práctica nunca se había implementado ni para Agrocasa (el campo existía pero nada lo alimentaba). **Sin prorrateo por línea/empleado**: la corrida completa se asigna a un solo costeable; si hace falta dividir, se corren corridas separadas.
+- **Costeo de Creixa (obras)**: al verificar el RNC de Creixa en DGII se confirmó que es una constructora, no una empresa de inversión (ver `CONTEXTO.md`) — necesita costeo de proyecto, no de lote. Tabla nueva `obras` (`alembic/0005_obras_costeo_proyecto.py`), análoga a `lotes_cosecha` pero con una diferencia clave: **una obra se factura por avances a lo largo del tiempo, no se vende entera de una vez.** Por eso `obras` tiene `costo_reconocido` además de `costo_acumulado` — cada factura contra la obra reconoce solo `costo_acumulado - costo_reconocido` (lo incurrido desde la última factura) como `COSTO_VENTA`, no el acumulado completo. Método de "costo incurrido", no de "% de avance estimado" — evita necesitar un costo total proyectado del contrato, que hoy no existe en el sistema.
 
-Esta es la misma razón por la que Facturación y Nómina quedaron como secciones bloqueadas en el frontend (`frontend/src/App.tsx`, array `PLACEHOLDERS`) en vez de recibir CRUD directo como Empleados/Clientes/Almacenes/Lotes: no son formularios aislados, son estos efectos secundarios contables/inventario que dependen de reglas que el contador todavía no ha confirmado (Open Questions 1, 3, 5, 6, 7, 9). No construir CRUD parcial de Facturas/Nóminas que omita esta cadena — sería reintroducir el mismo problema que "The Assignment" ya bloquea.
+Esto ya no está bloqueado ni es CRUD parcial: Facturas y Nóminas tienen motor completo (`app/services/contabilizacion.py`, `nomina_calculo.py`, `nomina_eventos.py`, `facturacion.py`) construido sobre las respuestas dadas en "Resolución experta de Open Questions" — pendiente de que el contador real las revise, no de que el código exista.
 
 ## Decisiones técnicas (plan-eng-review)
 

@@ -50,6 +50,30 @@ def test_crear_factura_rechaza_empresa_no_autorizada():
     assert response.status_code == 403
 
 
+def test_crear_factura_rechaza_lote_y_obra_juntos():
+    usuario = _fake_usuario()
+
+    app.dependency_overrides[get_current_user] = lambda: usuario
+    with patch("app.core.deps.AppSessionLocal", return_value=MagicMock()):
+        client = TestClient(app)
+        response = client.post(
+            "/facturas",
+            json={
+                "empresa_id": 11,
+                "sucursal_id": 1,
+                "cliente_id": 5,
+                "tipo_factura": "local",
+                "fecha_emision": "2026-08-26",
+                "lote_id": 3,
+                "obra_id": 7,
+                "lineas": [{"descripcion": "Cafe qq", "cantidad": 10, "precio_unitario": 100}],
+            },
+        )
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+
+
 def test_crear_factura_sin_secuencia_ecf_configurada_devuelve_400():
     usuario = _fake_usuario()
     cliente = Cliente(

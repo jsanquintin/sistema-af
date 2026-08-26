@@ -60,6 +60,7 @@ const modulos: Modulo[] = [
       { path: 'almacenes', label: 'Almacenes' },
       { path: 'movimientos', label: 'Movimientos' },
       { path: 'lotes', label: 'Lotes de Cosecha' },
+      { path: 'obras', label: 'Obras' },
     ],
   },
   {

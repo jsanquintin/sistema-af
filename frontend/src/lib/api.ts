@@ -121,6 +121,23 @@ export interface LoteCosecha {
 }
 export type LoteCosechaInput = Omit<LoteCosecha, 'id' | 'costo_acumulado' | 'estado'>
 
+export interface Obra {
+  id: number
+  empresa_id: number
+  sucursal_id: number
+  cliente_id: number
+  codigo: string
+  nombre: string
+  monto_contrato: number
+  moneda: string
+  fecha_inicio: string
+  fecha_fin_estimada: string | null
+  costo_acumulado: number
+  costo_reconocido: number
+  estado: 'en_proceso' | 'cerrada'
+}
+export type ObraInput = Omit<Obra, 'id' | 'costo_acumulado' | 'costo_reconocido' | 'estado'>
+
 export interface InventarioMovimiento {
   id: number
   lote_id: number
@@ -191,6 +208,15 @@ export const actualizarLoteCosecha = (token: string, id: number, data: LoteCosec
   request<LoteCosecha>('PUT', `/lotes-cosecha/${id}`, token, data, 'No se pudo actualizar el lote')
 export const eliminarLoteCosecha = (token: string, id: number) =>
   request<void>('DELETE', `/lotes-cosecha/${id}`, token, undefined, 'No se pudo eliminar el lote')
+
+export const getObras = (token: string, empresaId: number) =>
+  request<Obra[]>('GET', `/obras?empresa_id=${empresaId}`, token, undefined, 'No se pudieron cargar las obras')
+export const crearObra = (token: string, data: ObraInput) =>
+  request<Obra>('POST', '/obras', token, data, 'No se pudo crear la obra')
+export const actualizarObra = (token: string, id: number, data: ObraInput) =>
+  request<Obra>('PUT', `/obras/${id}`, token, data, 'No se pudo actualizar la obra')
+export const eliminarObra = (token: string, id: number) =>
+  request<void>('DELETE', `/obras/${id}`, token, undefined, 'No se pudo eliminar la obra')
 
 export const getInventarioMovimientos = (token: string) =>
   request<InventarioMovimiento[]>('GET', '/inventario-movimientos', token, undefined, 'No se pudieron cargar los movimientos')
@@ -285,6 +311,8 @@ export interface NominaCorrida {
   periodo_inicio: string
   periodo_fin: string
   incluye_tss: boolean
+  costeable_tipo: 'lote' | 'obra' | null
+  costeable_id: number | null
   cerrada: boolean
   asiento_id: number | null
 }
@@ -357,6 +385,7 @@ export interface Factura {
   total: number
   estado_ecf: 'pendiente' | 'aceptado' | 'rechazado' | 'no_aplica'
   lote_id: number | null
+  obra_id: number | null
   asiento_id: number | null
   lineas: FacturaDetalle[]
 }
@@ -368,6 +397,7 @@ export interface FacturaInput {
   fecha_emision: string
   moneda: string
   lote_id: number | null
+  obra_id: number | null
   lineas: FacturaDetalleInput[]
 }
 

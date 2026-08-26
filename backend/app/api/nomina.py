@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 from app.core.acceso import verificar_acceso_empresa
 from app.core.deps import get_current_user, get_tenant_db
 from app.models.empleado import Empleado
+from app.models.lote_cosecha import LoteCosecha
 from app.models.nomina import NominaCorrida, NominaDetalle
+from app.models.obra import Obra
 from app.models.parametro_nomina import ParametroNomina
 from app.models.sucursal import Sucursal
 from app.models.usuario import Usuario
@@ -31,6 +33,39 @@ def _obtener_parametros(db: Session, anio_fiscal: int) -> ParametroNomina:
             "cargar tramos ISR y tasas TSS de ese anio antes de calcular"
         )
     return parametros
+
+
+def _resolver_costeable(db: Session, corrida: NominaCorrida) -> LoteCosecha | Obra | None:
+    """Valida y devuelve el lote/obra asignado a la corrida ANTES de
+    generar el asiento -- generar_asiento_automatico hace su propio
+    commit interno, asi que un costeable invalido debe fallar antes de
+    esa llamada, no despues (evita dejar un asiento posteado sin que la
+    corrida quede marcada cerrada, que forzaria un segundo asiento
+    duplicado en el proximo intento de /cerrar).
+    """
+    if corrida.costeable_tipo is None:
+        return None
+    modelo = LoteCosecha if corrida.costeable_tipo == "lote" else Obra
+    costeable = db.get(modelo, corrida.costeable_id)
+    if costeable is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{corrida.costeable_tipo.capitalize()} costeable no encontrado",
+        )
+    return costeable
+
+
+def _acumular_costo_corrida(costeable: LoteCosecha | Obra | None, detalle: list[NominaDetalle]) -> None:
+    """Carga el bruto de TODA la corrida al lote/obra ya resuelto por
+    _resolver_costeable (sin prorrateo por linea, ver
+    NominaCorridaCreate.costeable_tipo) -- cierra el hueco que
+    docs/designs/nucleo-contabilidad-nomina.md ya senalaba como
+    pendiente: nomina nunca alimentaba costo_acumulado.
+    """
+    if costeable is None:
+        return
+    costo_mano_obra = round(sum(float(fila.monto_bruto) for fila in detalle), 2)
+    costeable.costo_acumulado = float(costeable.costo_acumulado) + costo_mano_obra
 
 
 def _obtener_o_404(db: Session, corrida_id: int, usuario: Usuario) -> NominaCorrida:
@@ -166,6 +201,8 @@ def cerrar_corrida(
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
+    costeable = _resolver_costeable(db, corrida)
+
     eventos = []
     for fila in detalle:
         empleado = db.get(Empleado, fila.empleado_id)
@@ -206,6 +243,8 @@ def cerrar_corrida(
     except ValueError as exc:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    _acumular_costo_corrida(costeable, detalle)
 
     corrida.cerrada = True
     corrida.asiento_id = asiento.id

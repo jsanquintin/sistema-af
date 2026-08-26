@@ -13,6 +13,7 @@ import { InventarioMovimientosPage } from '@/pages/InventarioMovimientosPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { LotesCosechaPage } from '@/pages/LotesCosechaPage'
 import { NominaCorridasPage } from '@/pages/NominaCorridasPage'
+import { ObrasPage } from '@/pages/ObrasPage'
 import { PlanCuentasPage } from '@/pages/PlanCuentasPage'
 import { ReportesPage } from '@/pages/ReportesPage'
 import { SeccionPlaceholder } from '@/pages/SeccionPlaceholder'
@@ -224,6 +225,10 @@ function App() {
         <Route
           path="/inventario/movimientos"
           element={token && <InventarioMovimientosPage token={token} />}
+        />
+        <Route
+          path="/inventario/obras"
+          element={token && empresa && <ObrasPage token={token} empresaId={empresa.id} />}
         />
         <Route path="/configuracion" element={<Navigate to="/configuracion/empresas" replace />} />
         <Route

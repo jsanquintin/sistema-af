@@ -12,6 +12,7 @@ from app.api import (
     inventario_movimientos,
     lotes_cosecha,
     nomina,
+    obras,
     parametros_nomina,
     plan_cuentas,
     reglas_contabilizacion,
@@ -36,6 +37,7 @@ app.include_router(empleados.router)
 app.include_router(clientes.router)
 app.include_router(almacenes.router)
 app.include_router(lotes_cosecha.router)
+app.include_router(obras.router)
 app.include_router(inventario_movimientos.router)
 app.include_router(asientos.router)
 app.include_router(reglas_contabilizacion.router)

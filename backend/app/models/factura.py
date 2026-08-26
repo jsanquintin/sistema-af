@@ -16,6 +16,10 @@ class Factura(Base):
             "estado_ecf IN ('pendiente','aceptado','rechazado','no_aplica')",
             name="facturas_estado_ecf_check",
         ),
+        CheckConstraint(
+            "NOT (lote_id IS NOT NULL AND obra_id IS NOT NULL)",
+            name="facturas_lote_o_obra_check",
+        ),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -34,6 +38,7 @@ class Factura(Base):
     total: Mapped[float] = mapped_column(Numeric(14, 2), nullable=False)
     estado_ecf: Mapped[str] = mapped_column(String(20), nullable=False, default="pendiente")
     lote_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("lotes_cosecha.id"), nullable=True)
+    obra_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("obras.id"), nullable=True)
     asiento_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("asientos.id"), nullable=True)
 
 

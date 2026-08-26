@@ -1,6 +1,7 @@
 from datetime import date
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class NominaCorridaCreate(BaseModel):
@@ -11,6 +12,17 @@ class NominaCorridaCreate(BaseModel):
     periodo_inicio: date
     periodo_fin: date
     incluye_tss: bool = True
+    # Centro de costo al que se le carga el bruto de TODA la corrida al
+    # cerrarla (sin prorrateo por linea/empleado) -- ver
+    # app/api/nomina.py::cerrar_corrida. Ambos o ninguno.
+    costeable_tipo: Literal["lote", "obra"] | None = None
+    costeable_id: int | None = None
+
+    @model_validator(mode="after")
+    def _costeable_ambos_o_ninguno(self) -> "NominaCorridaCreate":
+        if (self.costeable_tipo is None) != (self.costeable_id is None):
+            raise ValueError("costeable_tipo y costeable_id deben venir juntos o ninguno")
+        return self
 
 
 class NominaCorridaResponse(NominaCorridaCreate):

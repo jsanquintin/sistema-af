@@ -9,11 +9,15 @@ import {
   cerrarNomina,
   crearNominaCorrida,
   getEmpleados,
+  getLotesCosecha,
   getNominaCorridas,
   getNominaDetalle,
+  getObras,
   type Empleado,
+  type LoteCosecha,
   type NominaCorrida,
   type NominaDetalle,
+  type Obra,
 } from '@/lib/api'
 
 interface NominaCorridasPageProps {
@@ -21,11 +25,16 @@ interface NominaCorridasPageProps {
   empresaId: number
 }
 
-const FORM_VACIO = { codigo: '', nombre: '', periodo_inicio: '', periodo_fin: '' }
+const selectClassName =
+  'h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50'
+
+const FORM_VACIO = { codigo: '', nombre: '', periodo_inicio: '', periodo_fin: '', costeable: '' }
 
 export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps) {
   const [corridas, setCorridas] = useState<NominaCorrida[] | null>(null)
   const [empleados, setEmpleados] = useState<Empleado[]>([])
+  const [lotes, setLotes] = useState<LoteCosecha[]>([])
+  const [obras, setObras] = useState<Obra[]>([])
   const [error, setError] = useState<string | null>(null)
   const [mostrarForm, setMostrarForm] = useState(false)
   const [form, setForm] = useState(FORM_VACIO)
@@ -52,6 +61,8 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
     getEmpleados(token)
       .then((todos) => setEmpleados(todos.filter((e) => e.empresa_id === empresaId)))
       .catch(() => setEmpleados([]))
+    getLotesCosecha(token).then((todos) => setLotes(todos.filter((l) => l.estado !== 'vendido' && l.estado !== 'exportado'))).catch(() => setLotes([]))
+    getObras(token, empresaId).then((todas) => setObras(todas.filter((o) => o.estado === 'en_proceso'))).catch(() => setObras([]))
   }, [token, empresaId])
 
   const jornaleros = empleados.filter((e) => e.tipo_empleado === 'jornalero')
@@ -65,8 +76,19 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
     event.preventDefault()
     setGuardando(true)
     setError(null)
+    const [costeableTipo, costeableIdStr] = form.costeable ? form.costeable.split(':') : [null, null]
     try {
-      await crearNominaCorrida(token, { empresa_id: empresaId, sucursal_id: null, incluye_tss: true, ...form })
+      await crearNominaCorrida(token, {
+        empresa_id: empresaId,
+        sucursal_id: null,
+        incluye_tss: true,
+        codigo: form.codigo,
+        nombre: form.nombre,
+        periodo_inicio: form.periodo_inicio,
+        periodo_fin: form.periodo_fin,
+        costeable_tipo: costeableTipo as 'lote' | 'obra' | null,
+        costeable_id: costeableIdStr ? Number(costeableIdStr) : null,
+      })
       setMostrarForm(false)
       cargar()
     } catch (err) {
@@ -181,6 +203,37 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
                 onChange={(e) => setForm({ ...form, periodo_fin: e.target.value })}
               />
             </div>
+            <div className="col-span-2 flex flex-col gap-1.5">
+              <Label htmlFor="costeable">
+                Centro de costo (opcional — carga el bruto de toda la corrida a un lote u obra al cerrarla)
+              </Label>
+              <select
+                id="costeable"
+                className={selectClassName}
+                value={form.costeable}
+                onChange={(e) => setForm({ ...form, costeable: e.target.value })}
+              >
+                <option value="">Sin asignar</option>
+                {lotes.length > 0 && (
+                  <optgroup label="Lotes de cosecha">
+                    {lotes.map((l) => (
+                      <option key={`lote:${l.id}`} value={`lote:${l.id}`}>
+                        {l.producto} — {l.fecha_cosecha}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {obras.length > 0 && (
+                  <optgroup label="Obras">
+                    {obras.map((o) => (
+                      <option key={`obra:${o.id}`} value={`obra:${o.id}`}>
+                        {o.codigo} — {o.nombre}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
+            </div>
           </div>
           <div className="flex gap-2">
             <Button type="submit" disabled={guardando} size="sm">
@@ -232,6 +285,7 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
                 <th className="px-3 py-2 font-medium">Código</th>
                 <th className="px-3 py-2 font-medium">Nombre</th>
                 <th className="px-3 py-2 font-medium">Periodo</th>
+                <th className="px-3 py-2 font-medium">Costeo</th>
                 <th className="px-3 py-2 font-medium">Estado</th>
                 <th className="px-3 py-2"></th>
               </tr>
@@ -244,6 +298,13 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
                     <td className="px-3 py-1.5">{corrida.nombre}</td>
                     <td className="font-tabular px-3 py-1.5 text-muted-foreground">
                       {corrida.periodo_inicio} — {corrida.periodo_fin}
+                    </td>
+                    <td className="px-3 py-1.5 text-muted-foreground">
+                      {corrida.costeable_tipo === 'lote' &&
+                        (lotes.find((l) => l.id === corrida.costeable_id)?.producto ?? `Lote #${corrida.costeable_id}`)}
+                      {corrida.costeable_tipo === 'obra' &&
+                        (obras.find((o) => o.id === corrida.costeable_id)?.codigo ?? `Obra #${corrida.costeable_id}`)}
+                      {corrida.costeable_tipo === null && '—'}
                     </td>
                     <td className="px-3 py-1.5">
                       <span
@@ -287,7 +348,7 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
                   </tr>
                   {detalleAbierto === corrida.id && (
                     <tr>
-                      <td colSpan={5} className="bg-muted/30 px-3 py-2">
+                      <td colSpan={6} className="bg-muted/30 px-3 py-2">
                         {detalle.length === 0 ? (
                           <p className="text-sm text-muted-foreground">Sin líneas calculadas todavía.</p>
                         ) : (
@@ -324,7 +385,7 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
               ))}
               {corridas.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-3 py-6 text-center text-sm text-muted-foreground">
+                  <td colSpan={6} className="px-3 py-6 text-center text-sm text-muted-foreground">
                     Sin corridas registradas todavía.
                   </td>
                 </tr>
