@@ -351,10 +351,18 @@ export interface BalanceComprobacionLinea {
   saldo: number
 }
 
-export const getBalanceComprobacion = (token: string, empresaId: number, desde: string, hasta: string) =>
+export const getBalanceComprobacion = (
+  token: string,
+  empresaId: number,
+  desde: string,
+  hasta: string,
+  sucursalId?: number | null
+) =>
   request<BalanceComprobacionLinea[]>(
     'GET',
-    `/reportes/balance-comprobacion?empresa_id=${empresaId}&desde=${desde}&hasta=${hasta}`,
+    `/reportes/balance-comprobacion?empresa_id=${empresaId}&desde=${desde}&hasta=${hasta}${
+      sucursalId ? `&sucursal_id=${sucursalId}` : ''
+    }`,
     token,
     undefined,
     'No se pudo generar el balance de comprobación'

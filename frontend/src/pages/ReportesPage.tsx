@@ -1,14 +1,23 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ApiError, getBalanceComprobacion, type BalanceComprobacionLinea } from '@/lib/api'
+import {
+  ApiError,
+  getBalanceComprobacion,
+  getSucursales,
+  type BalanceComprobacionLinea,
+  type Sucursal,
+} from '@/lib/api'
 
 interface ReportesPageProps {
   token: string
   empresaId: number
 }
+
+const selectClassName =
+  'h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50'
 
 function primerDiaDelMes(): string {
   const hoy = new Date()
@@ -22,16 +31,22 @@ function hoyISO(): string {
 export function ReportesPage({ token, empresaId }: ReportesPageProps) {
   const [desde, setDesde] = useState(primerDiaDelMes())
   const [hasta, setHasta] = useState(hoyISO())
+  const [sucursalId, setSucursalId] = useState('')
+  const [sucursales, setSucursales] = useState<Sucursal[]>([])
   const [filas, setFilas] = useState<BalanceComprobacionLinea[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [cargando, setCargando] = useState(false)
+
+  useEffect(() => {
+    getSucursales(token, empresaId).then(setSucursales).catch(() => setSucursales([]))
+  }, [token, empresaId])
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setCargando(true)
     setError(null)
     try {
-      setFilas(await getBalanceComprobacion(token, empresaId, desde, hasta))
+      setFilas(await getBalanceComprobacion(token, empresaId, desde, hasta, sucursalId ? Number(sucursalId) : null))
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo generar el balance de comprobación')
     } finally {
@@ -57,6 +72,22 @@ export function ReportesPage({ token, empresaId }: ReportesPageProps) {
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="hasta">Hasta</Label>
           <Input id="hasta" type="date" required value={hasta} onChange={(e) => setHasta(e.target.value)} />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="sucursal_id">Sucursal</Label>
+          <select
+            id="sucursal_id"
+            className={selectClassName}
+            value={sucursalId}
+            onChange={(e) => setSucursalId(e.target.value)}
+          >
+            <option value="">Todas las sucursales</option>
+            {sucursales.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.nombre}
+              </option>
+            ))}
+          </select>
         </div>
         <Button type="submit" disabled={cargando} size="sm">
           Generar

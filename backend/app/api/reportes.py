@@ -1,10 +1,10 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
-from app.core.acceso import verificar_acceso_empresa
+from app.core.acceso import empresa_de_sucursal, verificar_acceso_empresa
 from app.core.deps import get_current_user, get_tenant_db
 from app.models.asiento import Asiento, AsientoDetalle
 from app.models.plan_cuenta import PlanCuenta
@@ -19,10 +19,30 @@ def balance_comprobacion(
     empresa_id: int,
     desde: date,
     hasta: date,
+    sucursal_id: int | None = None,
     usuario: Usuario = Depends(get_current_user),
     db: Session = Depends(get_tenant_db),
 ) -> list[BalanceComprobacionLinea]:
     verificar_acceso_empresa(usuario, empresa_id)
+
+    # sucursal_id es opcional: sin el, el balance consolida todas las
+    # sucursales de la empresa (comportamiento original). Si se pasa, se
+    # valida que pertenezca a esta empresa -- la cuenta contable es una
+    # sola por empresa (ver docs/designs), sucursal_id es solo la
+    # dimension de costeo que ya vive en cada linea de asiento_detalle.
+    if sucursal_id is not None and empresa_de_sucursal(db, sucursal_id) != empresa_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="La sucursal no pertenece a esta empresa"
+        )
+
+    condiciones = [
+        Asiento.empresa_id == empresa_id,
+        Asiento.estado == "posteado",
+        Asiento.fecha >= desde,
+        Asiento.fecha <= hasta,
+    ]
+    if sucursal_id is not None:
+        condiciones.append(AsientoDetalle.sucursal_id == sucursal_id)
 
     # Solo asientos posteados -- un borrador no representa un hecho
     # contable confirmado todavia, no debe aparecer en el balance.
@@ -40,12 +60,7 @@ def balance_comprobacion(
             & (PlanCuenta.empresa_id == AsientoDetalle.empresa_id)
             & (PlanCuenta.numero_cta == AsientoDetalle.numero_cta),
         )
-        .where(
-            Asiento.empresa_id == empresa_id,
-            Asiento.estado == "posteado",
-            Asiento.fecha >= desde,
-            Asiento.fecha <= hasta,
-        )
+        .where(*condiciones)
         .group_by(AsientoDetalle.numero_cta, PlanCuenta.nombre)
         .order_by(AsientoDetalle.numero_cta)
     )

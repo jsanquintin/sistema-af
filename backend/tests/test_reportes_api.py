@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from app.core.deps import get_current_user
 from app.main import app
+from app.models.sucursal import Sucursal
 from app.models.usuario import Usuario
 
 
@@ -67,3 +68,41 @@ def test_balance_comprobacion_agrega_por_cuenta():
     assert filas[0]["numero_cta"] == "10101"
     assert filas[0]["saldo"] == 1000.0
     assert filas[1]["saldo"] == -1000.0
+
+
+def test_balance_comprobacion_rechaza_sucursal_de_otra_empresa():
+    usuario = _fake_usuario()
+    sucursal_ajena = Sucursal(id=1, tenant_id=usuario.tenant_id, empresa_id=9, codigo="S1", nombre="Ocoa", tipo="finca")
+    fake_session = MagicMock()
+    fake_session.get.return_value = sucursal_ajena
+
+    app.dependency_overrides[get_current_user] = lambda: usuario
+    with patch("app.core.deps.AppSessionLocal", return_value=fake_session):
+        client = TestClient(app)
+        response = client.get(
+            "/reportes/balance-comprobacion",
+            params={"empresa_id": 11, "desde": "2026-08-01", "hasta": "2026-08-31", "sucursal_id": 1},
+        )
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 400
+
+
+def test_balance_comprobacion_filtra_por_sucursal_valida():
+    usuario = _fake_usuario()
+    sucursal = Sucursal(id=1, tenant_id=usuario.tenant_id, empresa_id=11, codigo="S1", nombre="Ocoa", tipo="finca")
+    fake_session = MagicMock()
+    fake_session.get.return_value = sucursal
+    fake_session.execute.return_value.all.return_value = [("10101", "Caja General", 500.0, 0.0)]
+
+    app.dependency_overrides[get_current_user] = lambda: usuario
+    with patch("app.core.deps.AppSessionLocal", return_value=fake_session):
+        client = TestClient(app)
+        response = client.get(
+            "/reportes/balance-comprobacion",
+            params={"empresa_id": 11, "desde": "2026-08-01", "hasta": "2026-08-31", "sucursal_id": 1},
+        )
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert response.json()[0]["numero_cta"] == "10101"
