@@ -38,12 +38,23 @@ export interface LoginResponse {
   token_type: string
 }
 
+export type Rol = 'admin' | 'contador' | 'nomina' | 'facturacion' | 'consulta'
+
 export interface Usuario {
   id: string
   email: string
   nombre_completo: string
-  rol: string
+  rol: Rol
   tenant_id: string
+}
+
+export interface UsuarioGestionado {
+  id: string
+  empresa_id: number | null
+  email: string
+  nombre_completo: string
+  rol: Rol
+  activo: boolean
 }
 
 export interface Empresa {
@@ -499,3 +510,16 @@ export interface ParametroNomina {
 
 export const getParametrosNomina = (token: string) =>
   request<ParametroNomina[]>('GET', '/parametros-nomina', token, undefined, 'No se pudieron cargar los parámetros de nómina')
+
+// ── Usuarios (solo admin) ────────────────────────────────────────────────
+
+export const getUsuarios = (token: string) =>
+  request<UsuarioGestionado[]>('GET', '/usuarios', token, undefined, 'No se pudieron cargar los usuarios')
+export const restablecerPasswordUsuario = (token: string, usuarioId: string, nuevaPassword: string) =>
+  request<void>(
+    'POST',
+    `/usuarios/${usuarioId}/restablecer-password`,
+    token,
+    { nueva_password: nuevaPassword },
+    'No se pudo restablecer la contraseña'
+  )

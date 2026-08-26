@@ -21,6 +21,7 @@ import { ReglasContabilizacionPage } from '@/pages/ReglasContabilizacionPage'
 import { ReportesPage } from '@/pages/ReportesPage'
 import { SeccionPlaceholder } from '@/pages/SeccionPlaceholder'
 import { SeleccionarEmpresaPage } from '@/pages/SeleccionarEmpresaPage'
+import { UsuariosPage } from '@/pages/UsuariosPage'
 
 const TOKEN_STORAGE_KEY = 'sistema-af.token'
 const EMPRESA_STORAGE_KEY = 'sistema-af.empresaId'
@@ -248,6 +249,7 @@ function App() {
           path="/configuracion/empresas"
           element={token && <ConfiguracionEmpresasPage token={token} />}
         />
+        <Route path="/configuracion/usuarios" element={token && <UsuariosPage token={token} />} />
         {PLACEHOLDERS.map(({ path, titulo, descripcion }) => (
           <Route key={path} path={path} element={<SeccionPlaceholder titulo={titulo} descripcion={descripcion} />} />
         ))}

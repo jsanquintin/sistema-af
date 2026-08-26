@@ -24,6 +24,7 @@ export function AppShell({ usuario, empresa, sucursal, onLogout, onCambiarEmpres
       <Sidebar
         empresa={empresa}
         sucursal={sucursal}
+        rol={usuario.rol}
         onCambiarEmpresa={onCambiarEmpresa}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

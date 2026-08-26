@@ -1,11 +1,12 @@
 import { BookOpen, Boxes, LayoutDashboard, ReceiptText, Settings, Users } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 
-import type { Empresa, Sucursal } from '@/lib/api'
+import type { Empresa, Sucursal, Usuario } from '@/lib/api'
 
 interface SidebarProps {
   empresa: Empresa
   sucursal: Sucursal | null
+  rol: Usuario['rol']
   onCambiarEmpresa: () => void
   open: boolean
   onClose: () => void
@@ -72,7 +73,15 @@ const modulos: Modulo[] = [
   },
 ]
 
-export function Sidebar({ empresa, sucursal, onCambiarEmpresa, open, onClose }: SidebarProps) {
+export function Sidebar({ empresa, sucursal, rol, onCambiarEmpresa, open, onClose }: SidebarProps) {
+  const modulosVisibles =
+    rol === 'admin'
+      ? modulos.map((modulo) =>
+          modulo.id === 'configuracion'
+            ? { ...modulo, items: [...modulo.items, { path: 'usuarios', label: 'Usuarios' }] }
+            : modulo
+        )
+      : modulos
   return (
     <>
       {/* Scrim: solo existe (y solo importa) por debajo de lg, donde el
@@ -125,7 +134,7 @@ export function Sidebar({ empresa, sucursal, onCambiarEmpresa, open, onClose }: 
           Dashboard
         </NavLink>
 
-        {modulos.map(({ id, label, icon: Icon, items }) => (
+        {modulosVisibles.map(({ id, label, icon: Icon, items }) => (
           <div key={id}>
             <div className="mb-1 flex items-center gap-1.5 px-2 text-xs font-medium text-muted-foreground">
               <Icon className="size-3.5" />

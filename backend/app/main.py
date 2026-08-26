@@ -17,6 +17,7 @@ from app.api import (
     plan_cuentas,
     reglas_contabilizacion,
     reportes,
+    usuarios,
 )
 from app.core.config import settings
 
@@ -45,6 +46,7 @@ app.include_router(nomina.router)
 app.include_router(facturas.router)
 app.include_router(reportes.router)
 app.include_router(parametros_nomina.router)
+app.include_router(usuarios.router)
 
 
 @app.get("/health")
