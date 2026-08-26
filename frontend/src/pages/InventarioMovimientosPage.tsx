@@ -16,6 +16,7 @@ import {
 
 interface InventarioMovimientosPageProps {
   token: string
+  empresaId: number
 }
 
 const selectClassName =
@@ -39,7 +40,7 @@ const FORM_VACIO = {
   fecha: '',
 }
 
-export function InventarioMovimientosPage({ token }: InventarioMovimientosPageProps) {
+export function InventarioMovimientosPage({ token, empresaId }: InventarioMovimientosPageProps) {
   const [movimientos, setMovimientos] = useState<InventarioMovimiento[] | null>(null)
   const [lotes, setLotes] = useState<LoteCosecha[]>([])
   const [almacenes, setAlmacenes] = useState<Almacen[]>([])
@@ -49,16 +50,16 @@ export function InventarioMovimientosPage({ token }: InventarioMovimientosPagePr
   const [guardando, setGuardando] = useState(false)
 
   function cargar() {
-    getInventarioMovimientos(token)
+    getInventarioMovimientos(token, empresaId)
       .then(setMovimientos)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'No se pudieron cargar los movimientos'))
   }
 
-  useEffect(cargar, [token])
+  useEffect(cargar, [token, empresaId])
   useEffect(() => {
-    getLotesCosecha(token).then(setLotes).catch(() => setLotes([]))
-    getAlmacenes(token).then(setAlmacenes).catch(() => setAlmacenes([]))
-  }, [token])
+    getLotesCosecha(token, empresaId).then(setLotes).catch(() => setLotes([]))
+    getAlmacenes(token, empresaId).then(setAlmacenes).catch(() => setAlmacenes([]))
+  }, [token, empresaId])
 
   const necesitaOrigen = form.tipo_movimiento === 'salida' || form.tipo_movimiento === 'traslado'
   const necesitaDestino = form.tipo_movimiento === 'entrada' || form.tipo_movimiento === 'traslado'

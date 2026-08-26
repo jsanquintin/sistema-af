@@ -65,9 +65,9 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
     cargar()
   }, [token, empresaId])
   useEffect(() => {
-    getClientes(token).then((todos) => setClientes(todos.filter((c) => c.empresa_id === empresaId))).catch(() => setClientes([]))
+    getClientes(token, empresaId).then(setClientes).catch(() => setClientes([]))
     getSucursales(token, empresaId).then(setSucursales).catch(() => setSucursales([]))
-    getLotesCosecha(token).then((todos) => setLotes(todos.filter((l) => l.estado === 'disponible'))).catch(() => setLotes([]))
+    getLotesCosecha(token, empresaId).then((todos) => setLotes(todos.filter((l) => l.estado === 'disponible'))).catch(() => setLotes([]))
     getObras(token, empresaId).then((todas) => setObras(todas.filter((o) => o.estado === 'en_proceso'))).catch(() => setObras([]))
   }, [token, empresaId])
 
@@ -132,6 +132,12 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
 
       {clientes.length === 0 && (
         <p className="text-sm text-muted-foreground">Necesitas al menos un cliente registrado para facturar.</p>
+      )}
+      {sucursales.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          Necesitas al menos una sucursal registrada para esta empresa — créala en Configuración → Empresas y
+          Sucursales (define la secuencia e-CF).
+        </p>
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}
 

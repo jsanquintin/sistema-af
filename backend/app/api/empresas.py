@@ -6,7 +6,7 @@ from app.core.deps import get_current_user, get_tenant_db
 from app.models.empresa import Empresa
 from app.models.sucursal import Sucursal
 from app.models.usuario import Usuario
-from app.schemas.empresa import EmpresaResponse, SucursalResponse
+from app.schemas.empresa import EmpresaResponse, SucursalCreate, SucursalResponse
 
 router = APIRouter(prefix="/empresas", tags=["empresas"])
 
@@ -40,3 +40,24 @@ def listar_sucursales(
         .scalars()
         .all()
     )
+
+
+@router.post("/{empresa_id}/sucursales", response_model=SucursalResponse, status_code=status.HTTP_201_CREATED)
+def crear_sucursal(
+    empresa_id: int,
+    payload: SucursalCreate,
+    usuario: Usuario = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+) -> Sucursal:
+    if usuario.empresa_id is not None and usuario.empresa_id != empresa_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes acceso a esta empresa")
+
+    empresa = db.get(Empresa, empresa_id)
+    if empresa is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Empresa no encontrada")
+
+    sucursal = Sucursal(**payload.model_dump(), tenant_id=usuario.tenant_id, empresa_id=empresa_id, activo=True)
+    db.add(sucursal)
+    db.commit()
+    db.refresh(sucursal)
+    return sucursal

@@ -58,8 +58,9 @@ export interface Sucursal {
   empresa_id: number
   codigo: string
   nombre: string
-  tipo: string
+  tipo: 'finca' | 'oficina' | 'proyecto'
 }
+export type SucursalInput = Omit<Sucursal, 'id' | 'empresa_id'>
 
 export interface PlanCuenta {
   id: number
@@ -163,6 +164,14 @@ export const getEmpresas = (token: string) =>
 
 export const getSucursales = (token: string, empresaId: number) =>
   request<Sucursal[]>('GET', `/empresas/${empresaId}/sucursales`, token, undefined, 'No se pudieron cargar las sucursales')
+export const crearSucursal = (token: string, empresaId: number, data: SucursalInput) =>
+  request<Sucursal>(
+    'POST',
+    `/empresas/${empresaId}/sucursales`,
+    token,
+    data,
+    'No se pudo crear la sucursal'
+  )
 
 export const getPlanCuentas = (token: string, empresaId: number) =>
   request<PlanCuenta[]>(
@@ -173,8 +182,14 @@ export const getPlanCuentas = (token: string, empresaId: number) =>
     'No se pudo cargar el plan de cuentas'
   )
 
-export const getEmpleados = (token: string) =>
-  request<Empleado[]>('GET', '/empleados', token, undefined, 'No se pudieron cargar los empleados')
+export const getEmpleados = (token: string, empresaId: number) =>
+  request<Empleado[]>(
+    'GET',
+    `/empleados?empresa_id=${empresaId}`,
+    token,
+    undefined,
+    'No se pudieron cargar los empleados'
+  )
 export const crearEmpleado = (token: string, data: EmpleadoInput) =>
   request<Empleado>('POST', '/empleados', token, data, 'No se pudo crear el empleado')
 export const actualizarEmpleado = (token: string, id: number, data: EmpleadoInput) =>
@@ -182,8 +197,14 @@ export const actualizarEmpleado = (token: string, id: number, data: EmpleadoInpu
 export const eliminarEmpleado = (token: string, id: number) =>
   request<void>('DELETE', `/empleados/${id}`, token, undefined, 'No se pudo eliminar el empleado')
 
-export const getClientes = (token: string) =>
-  request<Cliente[]>('GET', '/clientes', token, undefined, 'No se pudieron cargar los clientes')
+export const getClientes = (token: string, empresaId: number) =>
+  request<Cliente[]>(
+    'GET',
+    `/clientes?empresa_id=${empresaId}`,
+    token,
+    undefined,
+    'No se pudieron cargar los clientes'
+  )
 export const crearCliente = (token: string, data: ClienteInput) =>
   request<Cliente>('POST', '/clientes', token, data, 'No se pudo crear el cliente')
 export const actualizarCliente = (token: string, id: number, data: ClienteInput) =>
@@ -191,8 +212,14 @@ export const actualizarCliente = (token: string, id: number, data: ClienteInput)
 export const eliminarCliente = (token: string, id: number) =>
   request<void>('DELETE', `/clientes/${id}`, token, undefined, 'No se pudo eliminar el cliente')
 
-export const getAlmacenes = (token: string) =>
-  request<Almacen[]>('GET', '/almacenes', token, undefined, 'No se pudieron cargar los almacenes')
+export const getAlmacenes = (token: string, empresaId: number) =>
+  request<Almacen[]>(
+    'GET',
+    `/almacenes?empresa_id=${empresaId}`,
+    token,
+    undefined,
+    'No se pudieron cargar los almacenes'
+  )
 export const crearAlmacen = (token: string, data: AlmacenInput) =>
   request<Almacen>('POST', '/almacenes', token, data, 'No se pudo crear el almacén')
 export const actualizarAlmacen = (token: string, id: number, data: AlmacenInput) =>
@@ -200,8 +227,14 @@ export const actualizarAlmacen = (token: string, id: number, data: AlmacenInput)
 export const eliminarAlmacen = (token: string, id: number) =>
   request<void>('DELETE', `/almacenes/${id}`, token, undefined, 'No se pudo eliminar el almacén')
 
-export const getLotesCosecha = (token: string) =>
-  request<LoteCosecha[]>('GET', '/lotes-cosecha', token, undefined, 'No se pudieron cargar los lotes')
+export const getLotesCosecha = (token: string, empresaId: number) =>
+  request<LoteCosecha[]>(
+    'GET',
+    `/lotes-cosecha?empresa_id=${empresaId}`,
+    token,
+    undefined,
+    'No se pudieron cargar los lotes'
+  )
 export const crearLoteCosecha = (token: string, data: LoteCosechaInput) =>
   request<LoteCosecha>('POST', '/lotes-cosecha', token, data, 'No se pudo crear el lote')
 export const actualizarLoteCosecha = (token: string, id: number, data: LoteCosechaInput) =>
@@ -218,8 +251,14 @@ export const actualizarObra = (token: string, id: number, data: ObraInput) =>
 export const eliminarObra = (token: string, id: number) =>
   request<void>('DELETE', `/obras/${id}`, token, undefined, 'No se pudo eliminar la obra')
 
-export const getInventarioMovimientos = (token: string) =>
-  request<InventarioMovimiento[]>('GET', '/inventario-movimientos', token, undefined, 'No se pudieron cargar los movimientos')
+export const getInventarioMovimientos = (token: string, empresaId: number) =>
+  request<InventarioMovimiento[]>(
+    'GET',
+    `/inventario-movimientos?empresa_id=${empresaId}`,
+    token,
+    undefined,
+    'No se pudieron cargar los movimientos'
+  )
 export const crearInventarioMovimiento = (token: string, data: InventarioMovimientoInput) =>
   request<InventarioMovimiento>('POST', '/inventario-movimientos', token, data, 'No se pudo crear el movimiento')
 

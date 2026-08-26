@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.acceso import verificar_acceso_empresa
 from app.core.deps import get_current_user, get_tenant_db
 from app.models.cliente import Cliente
 from app.models.usuario import Usuario
@@ -11,19 +12,14 @@ from app.schemas.cliente import ClienteCreate, ClienteResponse
 router = APIRouter(prefix="/clientes", tags=["clientes"])
 
 
-def _verificar_acceso_empresa(usuario: Usuario, empresa_id: int) -> None:
-    if usuario.empresa_id is not None and usuario.empresa_id != empresa_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes acceso a esta empresa")
-
-
 @router.get("", response_model=list[ClienteResponse])
 def listar_clientes(
+    empresa_id: int,
     usuario: Usuario = Depends(get_current_user),
     db: Session = Depends(get_tenant_db),
 ) -> list[Cliente]:
-    query = select(Cliente)
-    if usuario.empresa_id is not None:
-        query = query.where(Cliente.empresa_id == usuario.empresa_id)
+    verificar_acceso_empresa(usuario, empresa_id)
+    query = select(Cliente).where(Cliente.empresa_id == empresa_id)
     return list(db.execute(query).scalars().all())
 
 
@@ -33,7 +29,7 @@ def crear_cliente(
     usuario: Usuario = Depends(get_current_user),
     db: Session = Depends(get_tenant_db),
 ) -> Cliente:
-    _verificar_acceso_empresa(usuario, payload.empresa_id)
+    verificar_acceso_empresa(usuario, payload.empresa_id)
     cliente = Cliente(**payload.model_dump(), tenant_id=usuario.tenant_id)
     db.add(cliente)
     db.commit()
@@ -51,8 +47,8 @@ def actualizar_cliente(
     cliente = db.get(Cliente, cliente_id)
     if cliente is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
-    _verificar_acceso_empresa(usuario, cliente.empresa_id)
-    _verificar_acceso_empresa(usuario, payload.empresa_id)
+    verificar_acceso_empresa(usuario, cliente.empresa_id)
+    verificar_acceso_empresa(usuario, payload.empresa_id)
 
     for campo, valor in payload.model_dump().items():
         setattr(cliente, campo, valor)
@@ -70,7 +66,7 @@ def eliminar_cliente(
     cliente = db.get(Cliente, cliente_id)
     if cliente is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
-    _verificar_acceso_empresa(usuario, cliente.empresa_id)
+    verificar_acceso_empresa(usuario, cliente.empresa_id)
 
     # Borrado real -- clientes no tiene columna activo (a diferencia de
     # empleados/almacenes). Si en el futuro tiene facturas asociadas, la FK

@@ -1,17 +1,28 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 
-import { ApiError, getEmpresas, getSucursales, type Empresa, type Sucursal } from '@/lib/api'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { ApiError, crearSucursal, getEmpresas, getSucursales, type Empresa, type Sucursal } from '@/lib/api'
 
 interface ConfiguracionEmpresasPageProps {
   token: string
 }
 
+const selectClassName =
+  'h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50'
+
+const FORM_VACIO = { codigo: '', nombre: '', tipo: 'oficina' as Sucursal['tipo'] }
+
 export function ConfiguracionEmpresasPage({ token }: ConfiguracionEmpresasPageProps) {
   const [empresas, setEmpresas] = useState<Empresa[] | null>(null)
   const [sucursalesPorEmpresa, setSucursalesPorEmpresa] = useState<Record<number, Sucursal[]>>({})
   const [error, setError] = useState<string | null>(null)
+  const [formAbiertoPara, setFormAbiertoPara] = useState<number | null>(null)
+  const [form, setForm] = useState(FORM_VACIO)
+  const [guardando, setGuardando] = useState(false)
 
-  useEffect(() => {
+  function cargar() {
     getEmpresas(token)
       .then(async (data) => {
         setEmpresas(data)
@@ -21,7 +32,29 @@ export function ConfiguracionEmpresasPage({ token }: ConfiguracionEmpresasPagePr
         setSucursalesPorEmpresa(Object.fromEntries(entradas))
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'No se pudieron cargar las empresas'))
-  }, [token])
+  }
+
+  useEffect(cargar, [token])
+
+  function abrirForm(empresaId: number) {
+    setForm(FORM_VACIO)
+    setFormAbiertoPara(empresaId)
+  }
+
+  async function handleSubmit(event: FormEvent, empresaId: number) {
+    event.preventDefault()
+    setGuardando(true)
+    setError(null)
+    try {
+      await crearSucursal(token, empresaId, form)
+      setFormAbiertoPara(null)
+      cargar()
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo crear la sucursal')
+    } finally {
+      setGuardando(false)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -57,6 +90,63 @@ export function ConfiguracionEmpresasPage({ token }: ConfiguracionEmpresasPagePr
                     </li>
                   ))}
                 </ul>
+              )}
+
+              {formAbiertoPara === empresa.id ? (
+                <form
+                  onSubmit={(e) => handleSubmit(e, empresa.id)}
+                  className="mt-3 flex flex-col gap-2 border-t border-border pt-3"
+                >
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor={`codigo-${empresa.id}`}>Código</Label>
+                      <Input
+                        id={`codigo-${empresa.id}`}
+                        required
+                        value={form.codigo}
+                        onChange={(e) => setForm({ ...form, codigo: e.target.value })}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor={`nombre-${empresa.id}`}>Nombre</Label>
+                      <Input
+                        id={`nombre-${empresa.id}`}
+                        required
+                        value={form.nombre}
+                        onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor={`tipo-${empresa.id}`}>Tipo</Label>
+                      <select
+                        id={`tipo-${empresa.id}`}
+                        className={selectClassName}
+                        value={form.tipo}
+                        onChange={(e) => setForm({ ...form, tipo: e.target.value as Sucursal['tipo'] })}
+                      >
+                        <option value="finca">Finca</option>
+                        <option value="oficina">Oficina</option>
+                        <option value="proyecto">Proyecto</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="submit" disabled={guardando} size="sm">
+                      Crear sucursal
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setFormAbiertoPara(null)}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => abrirForm(empresa.id)}
+                  className="mt-3 cursor-pointer text-xs text-primary hover:underline"
+                >
+                  + Nueva sucursal
+                </button>
               )}
             </div>
           )

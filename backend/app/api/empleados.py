@@ -13,12 +13,12 @@ router = APIRouter(prefix="/empleados", tags=["empleados"])
 
 @router.get("", response_model=list[EmpleadoResponse])
 def listar_empleados(
+    empresa_id: int,
     usuario: Usuario = Depends(get_current_user),
     db: Session = Depends(get_tenant_db),
 ) -> list[Empleado]:
-    query = select(Empleado).where(Empleado.activo.is_(True))
-    if usuario.empresa_id is not None:
-        query = query.where(Empleado.empresa_id == usuario.empresa_id)
+    verificar_acceso_empresa(usuario, empresa_id)
+    query = select(Empleado).where(Empleado.activo.is_(True), Empleado.empresa_id == empresa_id)
     return list(db.execute(query).scalars().all())
 
 

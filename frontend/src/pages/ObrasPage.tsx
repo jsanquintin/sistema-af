@@ -62,7 +62,7 @@ export function ObrasPage({ token, empresaId }: ObrasPageProps) {
   }, [token, empresaId])
   useEffect(() => {
     getSucursales(token, empresaId).then((todas) => setSucursales(todas.filter((s) => s.tipo === 'proyecto'))).catch(() => setSucursales([]))
-    getClientes(token).then((todos) => setClientes(todos.filter((c) => c.empresa_id === empresaId))).catch(() => setClientes([]))
+    getClientes(token, empresaId).then(setClientes).catch(() => setClientes([]))
   }, [token, empresaId])
 
   function abrirNuevo() {

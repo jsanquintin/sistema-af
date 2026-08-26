@@ -53,15 +53,15 @@ export function LotesCosechaPage({ token, empresaId }: LotesCosechaPageProps) {
   const [guardando, setGuardando] = useState(false)
 
   function cargar() {
-    getLotesCosecha(token)
+    getLotesCosecha(token, empresaId)
       .then(setLotes)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'No se pudieron cargar los lotes'))
   }
 
-  useEffect(cargar, [token])
+  useEffect(cargar, [token, empresaId])
   useEffect(() => {
     getSucursales(token, empresaId).then(setSucursales).catch(() => setSucursales([]))
-    getAlmacenes(token).then(setAlmacenes).catch(() => setAlmacenes([]))
+    getAlmacenes(token, empresaId).then(setAlmacenes).catch(() => setAlmacenes([]))
   }, [token, empresaId])
 
   const almacenesDeSucursal = useMemo(
@@ -140,6 +140,11 @@ export function LotesCosechaPage({ token, empresaId }: LotesCosechaPageProps) {
         )}
       </div>
 
+      {sucursales.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          No hay sucursales registradas para esta empresa — crea una primero en Configuración.
+        </p>
+      )}
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {mostrarForm && (

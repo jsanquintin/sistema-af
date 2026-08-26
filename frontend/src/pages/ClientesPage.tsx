@@ -28,12 +28,12 @@ export function ClientesPage({ token, empresaId }: ClientesPageProps) {
   const [guardando, setGuardando] = useState(false)
 
   function cargar() {
-    getClientes(token)
+    getClientes(token, empresaId)
       .then(setClientes)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'No se pudieron cargar los clientes'))
   }
 
-  useEffect(cargar, [token])
+  useEffect(cargar, [token, empresaId])
 
   function abrirNuevo() {
     setForm(FORM_VACIO)

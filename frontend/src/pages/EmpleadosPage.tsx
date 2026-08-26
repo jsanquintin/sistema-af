@@ -44,12 +44,12 @@ export function EmpleadosPage({ token, empresaId }: EmpleadosPageProps) {
   const [guardando, setGuardando] = useState(false)
 
   function cargar() {
-    getEmpleados(token)
+    getEmpleados(token, empresaId)
       .then(setEmpleados)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'No se pudieron cargar los empleados'))
   }
 
-  useEffect(cargar, [token])
+  useEffect(cargar, [token, empresaId])
   useEffect(() => {
     getSucursales(token, empresaId).then(setSucursales).catch(() => setSucursales([]))
   }, [token, empresaId])

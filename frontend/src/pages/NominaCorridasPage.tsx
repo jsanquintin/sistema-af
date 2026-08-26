@@ -58,10 +58,8 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
     cargar()
   }, [token, empresaId])
   useEffect(() => {
-    getEmpleados(token)
-      .then((todos) => setEmpleados(todos.filter((e) => e.empresa_id === empresaId)))
-      .catch(() => setEmpleados([]))
-    getLotesCosecha(token).then((todos) => setLotes(todos.filter((l) => l.estado !== 'vendido' && l.estado !== 'exportado'))).catch(() => setLotes([]))
+    getEmpleados(token, empresaId).then(setEmpleados).catch(() => setEmpleados([]))
+    getLotesCosecha(token, empresaId).then((todos) => setLotes(todos.filter((l) => l.estado !== 'vendido' && l.estado !== 'exportado'))).catch(() => setLotes([]))
     getObras(token, empresaId).then((todas) => setObras(todas.filter((o) => o.estado === 'en_proceso'))).catch(() => setObras([]))
   }, [token, empresaId])
 

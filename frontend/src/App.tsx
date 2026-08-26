@@ -224,7 +224,7 @@ function App() {
         />
         <Route
           path="/inventario/movimientos"
-          element={token && <InventarioMovimientosPage token={token} />}
+          element={token && empresa && <InventarioMovimientosPage token={token} empresaId={empresa.id} />}
         />
         <Route
           path="/inventario/obras"

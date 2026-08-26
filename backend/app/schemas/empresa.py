@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -8,6 +10,14 @@ class EmpresaResponse(BaseModel):
     rnc: str
     razon_social: str
     nombre_comercial: str | None
+
+
+class SucursalCreate(BaseModel):
+    codigo: str
+    nombre: str
+    tipo: Literal["finca", "oficina", "proyecto"]
+    direccion: str | None = None
+    gerente: str | None = None
 
 
 class SucursalResponse(BaseModel):

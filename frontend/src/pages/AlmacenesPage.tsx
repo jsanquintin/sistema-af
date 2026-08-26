@@ -34,12 +34,12 @@ export function AlmacenesPage({ token, empresaId }: AlmacenesPageProps) {
   const [guardando, setGuardando] = useState(false)
 
   function cargar() {
-    getAlmacenes(token)
+    getAlmacenes(token, empresaId)
       .then(setAlmacenes)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'No se pudieron cargar los almacenes'))
   }
 
-  useEffect(cargar, [token])
+  useEffect(cargar, [token, empresaId])
   useEffect(() => {
     getSucursales(token, empresaId).then(setSucursales).catch(() => setSucursales([]))
   }, [token, empresaId])
