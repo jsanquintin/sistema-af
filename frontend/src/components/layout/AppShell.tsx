@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import type { Usuario } from '@/lib/api'
 
@@ -24,6 +25,7 @@ export function AppShell({ usuario, onLogout }: AppShellProps) {
             <span className="text-sm text-muted-foreground">
               {usuario.nombre_completo} · {usuario.rol}
             </span>
+            <ThemeToggle />
             <Button variant="outline" size="sm" onClick={onLogout}>
               Cerrar sesión
             </Button>

@@ -1,10 +1,19 @@
 <!doctype html>
-<html lang="es" class="dark">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>sistema-af</title>
+    <script>
+      // Aplica el tema antes del primer paint para evitar el flash del tema
+      // incorrecto. Oscuro es el default del producto (ver DESIGN.md) salvo
+      // que el usuario ya haya elegido claro explicitamente.
+      (function () {
+        var stored = localStorage.getItem('sistema-af.theme');
+        document.documentElement.classList.toggle('dark', stored !== 'light');
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

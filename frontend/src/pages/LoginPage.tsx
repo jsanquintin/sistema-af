@@ -1,6 +1,7 @@
 import { Eye, EyeOff } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -34,6 +35,9 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   return (
     <div className="bg-grid bg-glow relative flex min-h-svh items-center justify-center overflow-hidden bg-background">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="animate-enter w-full max-w-sm">
         <div className="mb-10 flex items-center gap-3 px-1">
           <span className="h-8 w-1 rounded-full bg-primary" />
