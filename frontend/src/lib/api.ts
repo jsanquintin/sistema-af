@@ -68,10 +68,11 @@ export interface PlanCuenta {
   empresa_id: number
   numero_cta: string
   nivel: number
-  tipo_cta: number
+  tipo_cta: 1 | 2 | 3 | 4 | 5 | 6
   nombre: string
   activo: boolean
 }
+export type PlanCuentaInput = Omit<PlanCuenta, 'id' | 'activo'>
 
 export interface Empleado {
   id: number
@@ -193,6 +194,12 @@ export const getPlanCuentas = (token: string, empresaId: number) =>
     undefined,
     'No se pudo cargar el plan de cuentas'
   )
+export const crearPlanCuenta = (token: string, data: PlanCuentaInput) =>
+  request<PlanCuenta>('POST', '/plan-cuentas', token, data, 'No se pudo crear la cuenta')
+export const actualizarPlanCuenta = (token: string, id: number, data: PlanCuentaInput) =>
+  request<PlanCuenta>('PUT', `/plan-cuentas/${id}`, token, data, 'No se pudo actualizar la cuenta')
+export const eliminarPlanCuenta = (token: string, id: number) =>
+  request<void>('DELETE', `/plan-cuentas/${id}`, token, undefined, 'No se pudo desactivar la cuenta')
 
 export const getEmpleados = (token: string, empresaId: number) =>
   request<Empleado[]>(
