@@ -171,7 +171,17 @@ def upgrade() -> None:
         "CHECK (origen_tipo IN ('factura','nomina','manual','inventario','apertura'))"
     )
 
-    # 2) asiento_detalle.empresa_id, denormalizado desde asientos.empresa_id
+    # 2) Los dos FKs compuestos que hoy apuntan a
+    # plan_cuentas(tenant_id, numero_cta) deben caer ANTES de tocar el
+    # unique constraint de plan_cuentas del que dependen -- Postgres no
+    # deja hacer DROP CONSTRAINT de un unique con FKs dependientes
+    # (psycopg2.errors.DependentObjectsStillExist, confirmado en el
+    # primer intento de deploy de esta migracion). Se re-crean mas abajo
+    # ya apuntando a la nueva clave compuesta con empresa_id.
+    run(_DROP_ASIENTO_DETALLE_PLAN_CUENTAS_FKEY)
+    run(_DROP_REGLAS_PLAN_CUENTAS_FKEY)
+
+    # 3) asiento_detalle.empresa_id, denormalizado desde asientos.empresa_id
     run("ALTER TABLE asiento_detalle ADD COLUMN empresa_id INTEGER REFERENCES empresas(id)")
     run(
         "UPDATE asiento_detalle ad SET empresa_id = a.empresa_id "
@@ -179,10 +189,10 @@ def upgrade() -> None:
     )
     run("ALTER TABLE asiento_detalle ALTER COLUMN empresa_id SET NOT NULL")
 
-    # 3) plan_cuentas por empresa. Sin backfill automatico a proposito: si
+    # 4) plan_cuentas por empresa. Sin backfill automatico a proposito: si
     # ya hay filas cargadas bajo el esquema viejo, SET NOT NULL falla aqui
     # y obliga a resolver a mano cual empresa le corresponde a cada una en
-    # vez de asumir una -- en este entorno de trabajo no hay filas reales.
+    # vez de asumir una.
     run("ALTER TABLE plan_cuentas ADD COLUMN empresa_id INTEGER REFERENCES empresas(id)")
     run(_DROP_PLAN_CUENTAS_UNIQUE)
     run("ALTER TABLE plan_cuentas ALTER COLUMN empresa_id SET NOT NULL")
@@ -192,7 +202,7 @@ def upgrade() -> None:
     )
     run("CREATE INDEX ix_plan_cuentas_tenant_empresa ON plan_cuentas (tenant_id, empresa_id)")
 
-    # 4) reglas_contabilizacion por empresa (mismo motivo)
+    # 5) reglas_contabilizacion por empresa (mismo motivo)
     run("ALTER TABLE reglas_contabilizacion ADD COLUMN empresa_id INTEGER REFERENCES empresas(id)")
     run(_DROP_REGLAS_UNIQUE)
     run("ALTER TABLE reglas_contabilizacion ALTER COLUMN empresa_id SET NOT NULL")
@@ -206,21 +216,19 @@ def upgrade() -> None:
         "ON reglas_contabilizacion (tenant_id, empresa_id)"
     )
 
-    # 5) FKs compuestos contra plan_cuentas ahora incluyen empresa_id
-    run(_DROP_ASIENTO_DETALLE_PLAN_CUENTAS_FKEY)
+    # 6) Re-crear los FKs de (2), ahora contra la clave compuesta nueva
     run(
         "ALTER TABLE asiento_detalle ADD CONSTRAINT asiento_detalle_plan_cuentas_fkey "
         "FOREIGN KEY (tenant_id, empresa_id, numero_cta) "
         "REFERENCES plan_cuentas (tenant_id, empresa_id, numero_cta)"
     )
-    run(_DROP_REGLAS_PLAN_CUENTAS_FKEY)
     run(
         "ALTER TABLE reglas_contabilizacion ADD CONSTRAINT reglas_contabilizacion_plan_cuentas_fkey "
         "FOREIGN KEY (tenant_id, empresa_id, numero_cta) "
         "REFERENCES plan_cuentas (tenant_id, empresa_id, numero_cta)"
     )
 
-    # 6) trigger de cuadre -> trigger de inmutabilidad (misma funcion, mismo
+    # 7) trigger de cuadre -> trigger de inmutabilidad (misma funcion, mismo
     # trigger trg_cuadre_asiento ya creado en 0001, no hace falta recrearlo)
     run(_FN_VALIDAR_ASIENTO_NUEVA)
 
