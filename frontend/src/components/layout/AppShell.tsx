@@ -17,7 +17,7 @@ export function AppShell({ usuario, onLogout }: AppShellProps) {
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-border px-6 py-3">
           <div className="flex items-center gap-2">
-            <span className="size-2 rounded-[2px] bg-primary" />
+            <span className="h-4 w-0.5 rounded-full bg-primary" />
             <span className="font-mono text-sm font-medium tracking-tight">sistema-af</span>
           </div>
           <div className="flex items-center gap-3">

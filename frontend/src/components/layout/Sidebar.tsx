@@ -22,10 +22,10 @@ export function Sidebar() {
           key={id}
           to={`/${id}`}
           className={({ isActive }) =>
-            `flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors ${
+            `flex cursor-pointer items-center gap-2 rounded-lg border-l-2 px-2 py-1.5 text-left text-sm transition-colors ${
               isActive
-                ? 'bg-primary/10 font-medium text-primary'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                ? 'border-l-primary bg-primary/15 font-medium text-primary'
+                : 'border-l-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
             }`
           }
         >

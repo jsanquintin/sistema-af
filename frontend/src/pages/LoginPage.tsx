@@ -33,15 +33,17 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   }
 
   return (
-    <div className="bg-grid relative flex min-h-svh items-center justify-center bg-muted/30">
+    <div className="bg-grid bg-glow relative flex min-h-svh items-center justify-center overflow-hidden bg-background">
       <div className="animate-enter w-full max-w-sm">
-        <div className="mb-8 flex items-center gap-2 px-1">
-          <span className="size-2 rounded-[2px] bg-primary" />
-          <span className="font-mono text-sm font-medium tracking-tight">sistema-af</span>
+        <div className="mb-10 flex items-center gap-3 px-1">
+          <span className="h-8 w-1 rounded-full bg-primary" />
+          <span className="font-mono text-2xl font-semibold tracking-tight text-foreground">
+            sistema-af
+          </span>
         </div>
-        <Card>
+        <Card className="border-t-2 border-t-primary">
           <CardHeader>
-            <CardTitle as="h1" className="text-xl font-semibold tracking-tight">
+            <CardTitle as="h1" className="text-2xl font-semibold tracking-tight">
               Inicia sesión
             </CardTitle>
             <CardDescription>Ingresa tus credenciales para continuar</CardDescription>

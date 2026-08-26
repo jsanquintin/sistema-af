@@ -88,9 +88,9 @@
 .dark {
     --background: #16140f;
     --foreground: #f2efe9;
-    --card: #16140f;
+    --card: #211d17;
     --card-foreground: #f2efe9;
-    --popover: #16140f;
+    --popover: #211d17;
     --popover-foreground: #f2efe9;
     --primary: #e08347;
     --primary-foreground: oklch(0.205 0 0);
@@ -157,6 +157,20 @@
     background-size: 32px 32px;
     -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
     mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+  }
+
+  /* Resplandor de acento detras del contenido hero -- una sola fuente de
+     color (el cobre de marca), no un gradiente decorativo multicolor. */
+  .bg-glow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(
+      ellipse 60% 50% at 50% 0%,
+      color-mix(in oklch, var(--primary) 25%, transparent),
+      transparent 70%
+    );
   }
 }
 
