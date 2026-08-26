@@ -34,7 +34,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   }
 
   return (
-    <div className="bg-glow relative flex min-h-svh items-center justify-center overflow-hidden bg-background">
+    <div className="bg-ledger bg-glow relative flex min-h-svh items-center justify-center overflow-hidden bg-background">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>

@@ -153,6 +153,24 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Papel columnar de contabilidad: rayas horizontales de renglon + dos
+     reglas verticales de columna de monto (Debe/Haber), el patron de
+     papel que cualquier contador reconoce -- referencia real al
+     producto, no una decoracion generica tipo grid de ingenieria. */
+  .bg-ledger {
+    background-image:
+      linear-gradient(to bottom, var(--border) 1px, transparent 1px),
+      linear-gradient(to right, transparent 0 74%, var(--border) 74% calc(74% + 1px), transparent calc(74% + 1px)),
+      linear-gradient(to right, transparent 0 87%, var(--border) 87% calc(87% + 1px), transparent calc(87% + 1px));
+    background-size:
+      100% 26px,
+      100% 100%,
+      100% 100%;
+    background-repeat: repeat, no-repeat, no-repeat;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+  }
+
   /* Resplandor de acento detras del contenido hero -- una sola fuente de
      color (el acento de marca), no un gradiente decorativo multicolor. */
   .bg-glow::before {
