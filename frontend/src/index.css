@@ -57,7 +57,7 @@
     --card-foreground: #1c1a17;
     --popover: #f9f8f5;
     --popover-foreground: #1c1a17;
-    --primary: #B5622A;
+    --primary: #4b5320;
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -92,7 +92,7 @@
     --card-foreground: #f2efe9;
     --popover: #211d17;
     --popover-foreground: #f2efe9;
-    --primary: #e08347;
+    --primary: #b0c26e;
     --primary-foreground: oklch(0.205 0 0);
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
@@ -160,7 +160,7 @@
   }
 
   /* Resplandor de acento detras del contenido hero -- una sola fuente de
-     color (el cobre de marca), no un gradiente decorativo multicolor. */
+     color (el acento de marca), no un gradiente decorativo multicolor. */
   .bg-glow::before {
     content: "";
     position: absolute;
