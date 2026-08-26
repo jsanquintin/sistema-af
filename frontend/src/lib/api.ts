@@ -37,6 +37,15 @@ export interface Sucursal {
   tipo: string
 }
 
+export interface PlanCuenta {
+  id: number
+  numero_cta: string
+  nivel: number
+  tipo_cta: number
+  nombre: string
+  activo: boolean
+}
+
 export async function login(email: string, password: string): Promise<LoginResponse> {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
@@ -83,6 +92,18 @@ export async function getSucursales(token: string, empresaId: number): Promise<S
 
   if (!res.ok) {
     throw new ApiError(res.status, 'No se pudieron cargar las sucursales')
+  }
+
+  return res.json()
+}
+
+export async function getPlanCuentas(token: string): Promise<PlanCuenta[]> {
+  const res = await fetch(`${API_URL}/plan-cuentas`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+  if (!res.ok) {
+    throw new ApiError(res.status, 'No se pudo cargar el plan de cuentas')
   }
 
   return res.json()

@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppShell } from '@/components/layout/AppShell'
-import type { Seccion } from '@/components/layout/Sidebar'
 import { getEmpresas, getMe, getSucursales, type Empresa, type Sucursal, type Usuario } from '@/lib/api'
+import { ConfiguracionEmpresasPage } from '@/pages/ConfiguracionEmpresasPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { PlanCuentasPage } from '@/pages/PlanCuentasPage'
 import { SeccionPlaceholder } from '@/pages/SeccionPlaceholder'
 import { SeleccionarEmpresaPage } from '@/pages/SeleccionarEmpresaPage'
 
@@ -12,27 +13,60 @@ const TOKEN_STORAGE_KEY = 'sistema-af.token'
 const EMPRESA_STORAGE_KEY = 'sistema-af.empresaId'
 const SUCURSAL_STORAGE_KEY = 'sistema-af.sucursalId'
 
-const PLACEHOLDERS: Record<Seccion, { titulo: string; descripcion: string }> = {
-  contabilidad: {
-    titulo: 'Contabilidad',
+// Secciones sin motor de negocio todavia. Dos categorias, no las mezclamos:
+// "bloqueado" depende de una respuesta pendiente del contador (no es tarea
+// de codigo); las demas simplemente no se han construido todavia pero no
+// tienen ningun gate de negocio -- son el proximo trabajo natural.
+const PLACEHOLDERS: { path: string; titulo: string; descripcion: string }[] = [
+  {
+    path: '/contabilidad/asientos',
+    titulo: 'Asientos',
     descripcion:
-      'El motor de asientos está diseñado pero bloqueado hasta cerrar las preguntas pendientes con el contador (ver docs/designs/nucleo-contabilidad-nomina.md).',
+      'Bloqueado: el motor de asientos está diseñado pero depende de preguntas pendientes con el contador (numeración de comprobantes, saldo de apertura). Ver docs/designs/nucleo-contabilidad-nomina.md.',
   },
-  nomina: {
-    titulo: 'Nómina',
+  {
+    path: '/contabilidad/reportes',
+    titulo: 'Reportes',
+    descripcion: 'Bloqueado: depende de que existan asientos reales primero.',
+  },
+  {
+    path: '/nomina/empleados',
+    titulo: 'Empleados',
+    descripcion: 'Diseñado, pendiente de construir — no bloqueado por el contador.',
+  },
+  {
+    path: '/nomina/corridas',
+    titulo: 'Nóminas',
     descripcion:
-      'Bloqueado por el mismo gate que contabilidad: nómina compartida/separada y las tablas de ISR/TSS aún no están confirmadas.',
+      'Bloqueado: si la nómina es compartida o separada entre Agrocasa y Creixa, y las tablas de ISR/TSS, aún no están confirmadas.',
   },
-  facturacion: {
-    titulo: 'Facturación',
+  {
+    path: '/facturacion/clientes',
+    titulo: 'Clientes',
+    descripcion: 'Diseñado, pendiente de construir — no bloqueado por el contador.',
+  },
+  {
+    path: '/facturacion/facturas',
+    titulo: 'Facturas',
+    descripcion: 'Bloqueado: falta confirmar si e-CF es obligación legal activa para Agrocasa.',
+  },
+  {
+    path: '/inventario/almacenes',
+    titulo: 'Almacenes',
+    descripcion: 'Diseñado, pendiente de construir — no bloqueado por el contador.',
+  },
+  {
+    path: '/inventario/movimientos',
+    titulo: 'Movimientos',
+    descripcion: 'Diseñado, pendiente de construir — no bloqueado por el contador.',
+  },
+  {
+    path: '/inventario/lotes',
+    titulo: 'Lotes de Cosecha',
     descripcion:
-      'Diseño nuevo — Soluflex nunca tuvo esto en uso real. Pendiente confirmar si e-CF es obligación legal activa para Agrocasa.',
+      'Diseñado, pendiente de construir — no bloqueado por el contador. Sin datos históricos que migrar.',
   },
-  inventario: {
-    titulo: 'Inventario',
-    descripcion: 'Diseño nuevo por finca/lote de cosecha. Sin datos históricos que migrar.',
-  },
-}
+]
 
 // Resuelve la empresa/sucursal activa sin molestar al usuario cuando la
 // respuesta es obvia: una sola empresa, o una sola sucursal, se auto-elige.
@@ -145,7 +179,11 @@ function App() {
       <Route
         path="/login"
         element={
-          token ? <Navigate to="/contabilidad" replace /> : <LoginPage onLoginSuccess={handleLoginSuccess} />
+          token ? (
+            <Navigate to="/contabilidad/plan-cuentas" replace />
+          ) : (
+            <LoginPage onLoginSuccess={handleLoginSuccess} />
+          )
         }
       />
       <Route
@@ -154,7 +192,7 @@ function App() {
           !token ? (
             <Navigate to="/login" replace />
           ) : empresa ? (
-            <Navigate to="/contabilidad" replace />
+            <Navigate to="/contabilidad/plan-cuentas" replace />
           ) : (
             <SeleccionarEmpresaPage token={token} onSeleccionado={handleSeleccionEmpresa} />
           )
@@ -181,11 +219,20 @@ function App() {
           )
         }
       >
-        <Route path="/" element={<Navigate to="/contabilidad" replace />} />
-        <Route path="/contabilidad" element={<SeccionPlaceholder {...PLACEHOLDERS.contabilidad} />} />
-        <Route path="/nomina" element={<SeccionPlaceholder {...PLACEHOLDERS.nomina} />} />
-        <Route path="/facturacion" element={<SeccionPlaceholder {...PLACEHOLDERS.facturacion} />} />
-        <Route path="/inventario" element={<SeccionPlaceholder {...PLACEHOLDERS.inventario} />} />
+        <Route path="/" element={<Navigate to="/contabilidad/plan-cuentas" replace />} />
+        <Route path="/contabilidad" element={<Navigate to="/contabilidad/plan-cuentas" replace />} />
+        <Route path="/contabilidad/plan-cuentas" element={token && <PlanCuentasPage token={token} />} />
+        <Route path="/nomina" element={<Navigate to="/nomina/empleados" replace />} />
+        <Route path="/facturacion" element={<Navigate to="/facturacion/clientes" replace />} />
+        <Route path="/inventario" element={<Navigate to="/inventario/almacenes" replace />} />
+        <Route path="/configuracion" element={<Navigate to="/configuracion/empresas" replace />} />
+        <Route
+          path="/configuracion/empresas"
+          element={token && <ConfiguracionEmpresasPage token={token} />}
+        />
+        {PLACEHOLDERS.map(({ path, titulo, descripcion }) => (
+          <Route key={path} path={path} element={<SeccionPlaceholder titulo={titulo} descripcion={descripcion} />} />
+        ))}
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -1,9 +1,7 @@
-import { BookOpen, Boxes, ReceiptText, Users } from 'lucide-react'
+import { BookOpen, Boxes, ReceiptText, Settings, Users } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 
 import type { Empresa, Sucursal } from '@/lib/api'
-
-export type Seccion = 'contabilidad' | 'nomina' | 'facturacion' | 'inventario'
 
 interface SidebarProps {
   empresa: Empresa
@@ -13,11 +11,63 @@ interface SidebarProps {
   onClose: () => void
 }
 
-const secciones: { id: Seccion; label: string; icon: typeof BookOpen }[] = [
-  { id: 'contabilidad', label: 'Contabilidad', icon: BookOpen },
-  { id: 'nomina', label: 'Nómina', icon: Users },
-  { id: 'facturacion', label: 'Facturación', icon: ReceiptText },
-  { id: 'inventario', label: 'Inventario', icon: Boxes },
+interface SubItem {
+  path: string
+  label: string
+}
+
+interface Modulo {
+  id: string
+  label: string
+  icon: typeof BookOpen
+  items: SubItem[]
+}
+
+const modulos: Modulo[] = [
+  {
+    id: 'contabilidad',
+    label: 'Contabilidad',
+    icon: BookOpen,
+    items: [
+      { path: 'plan-cuentas', label: 'Plan de Cuentas' },
+      { path: 'asientos', label: 'Asientos' },
+      { path: 'reportes', label: 'Reportes' },
+    ],
+  },
+  {
+    id: 'nomina',
+    label: 'Nómina',
+    icon: Users,
+    items: [
+      { path: 'empleados', label: 'Empleados' },
+      { path: 'corridas', label: 'Nóminas' },
+    ],
+  },
+  {
+    id: 'facturacion',
+    label: 'Facturación',
+    icon: ReceiptText,
+    items: [
+      { path: 'clientes', label: 'Clientes' },
+      { path: 'facturas', label: 'Facturas' },
+    ],
+  },
+  {
+    id: 'inventario',
+    label: 'Inventario',
+    icon: Boxes,
+    items: [
+      { path: 'almacenes', label: 'Almacenes' },
+      { path: 'movimientos', label: 'Movimientos' },
+      { path: 'lotes', label: 'Lotes de Cosecha' },
+    ],
+  },
+  {
+    id: 'configuracion',
+    label: 'Configuración',
+    icon: Settings,
+    items: [{ path: 'empresas', label: 'Empresas y Sucursales' }],
+  },
 ]
 
 export function Sidebar({ empresa, sucursal, onCambiarEmpresa, open, onClose }: SidebarProps) {
@@ -33,11 +83,11 @@ export function Sidebar({ empresa, sucursal, onCambiarEmpresa, open, onClose }: 
         />
       )}
       <nav
-        className={`fixed inset-y-0 left-0 z-50 flex w-[240px] shrink-0 flex-col gap-1 border-r border-border bg-card p-4 transition-transform duration-200 ease-out lg:static lg:z-auto lg:w-[200px] lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[240px] shrink-0 flex-col gap-4 overflow-y-auto border-r border-border bg-card p-4 transition-transform duration-200 ease-out lg:static lg:z-auto lg:w-[220px] lg:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="mb-3 px-2">
+        <div className="px-2">
           <div className="flex items-center gap-1.5">
             <span className="size-1.5 rounded-[2px] bg-primary" />
             <span className="text-section-label truncate font-medium text-muted-foreground">
@@ -57,22 +107,32 @@ export function Sidebar({ empresa, sucursal, onCambiarEmpresa, open, onClose }: 
             </Link>
           </div>
         </div>
-        {secciones.map(({ id, label, icon: Icon }) => (
-          <NavLink
-            key={id}
-            to={`/${id}`}
-            onClick={onClose}
-            className={({ isActive }) =>
-              `flex cursor-pointer items-center gap-2 rounded-lg border-l-2 px-2 py-1.5 text-left text-sm transition-colors ${
-                isActive
-                  ? 'border-l-primary bg-primary/15 font-medium text-primary'
-                  : 'border-l-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`
-            }
-          >
-            <Icon className="size-4" />
-            {label}
-          </NavLink>
+
+        {modulos.map(({ id, label, icon: Icon, items }) => (
+          <div key={id}>
+            <div className="mb-1 flex items-center gap-1.5 px-2 text-xs font-medium text-muted-foreground">
+              <Icon className="size-3.5" />
+              {label}
+            </div>
+            <div className="flex flex-col gap-0.5">
+              {items.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={`/${id}/${item.path}`}
+                  onClick={onClose}
+                  className={({ isActive }) =>
+                    `cursor-pointer rounded-lg border-l-2 py-1.5 pr-2 pl-4 text-left text-sm transition-colors ${
+                      isActive
+                        ? 'border-l-primary bg-primary/15 font-medium text-primary'
+                        : 'border-l-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
+                    }`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
     </>
