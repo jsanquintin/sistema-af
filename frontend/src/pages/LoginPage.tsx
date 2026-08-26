@@ -39,7 +39,9 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl font-semibold tracking-tight">Inicia sesión</CardTitle>
+            <CardTitle as="h1" className="text-xl font-semibold tracking-tight">
+              Inicia sesión
+            </CardTitle>
             <CardDescription>Ingresa tus credenciales para continuar</CardDescription>
           </CardHeader>
           <CardContent>

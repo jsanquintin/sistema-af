@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppShell } from '@/components/layout/AppShell'
 import type { Seccion } from '@/components/layout/Sidebar'
@@ -63,25 +64,35 @@ function App() {
     setUsuario(null)
   }
 
-  if (!token) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />
-  }
-
-  if (checking || !usuario) {
-    return (
-      <div className="flex min-h-svh items-center justify-center">
-        <p className="text-muted-foreground">Verificando sesión…</p>
-      </div>
-    )
-  }
-
   return (
-    <AppShell usuario={usuario} onLogout={handleLogout}>
-      {(seccion) => {
-        const { titulo, descripcion } = PLACEHOLDERS[seccion]
-        return <SeccionPlaceholder titulo={titulo} descripcion={descripcion} />
-      }}
-    </AppShell>
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          token ? <Navigate to="/contabilidad" replace /> : <LoginPage onLoginSuccess={handleLoginSuccess} />
+        }
+      />
+      <Route
+        element={
+          !token ? (
+            <Navigate to="/login" replace />
+          ) : checking || !usuario ? (
+            <div className="flex min-h-svh items-center justify-center">
+              <p className="text-muted-foreground">Verificando sesión…</p>
+            </div>
+          ) : (
+            <AppShell usuario={usuario} onLogout={handleLogout} />
+          )
+        }
+      >
+        <Route path="/" element={<Navigate to="/contabilidad" replace />} />
+        <Route path="/contabilidad" element={<SeccionPlaceholder {...PLACEHOLDERS.contabilidad} />} />
+        <Route path="/nomina" element={<SeccionPlaceholder {...PLACEHOLDERS.nomina} />} />
+        <Route path="/facturacion" element={<SeccionPlaceholder {...PLACEHOLDERS.facturacion} />} />
+        <Route path="/inventario" element={<SeccionPlaceholder {...PLACEHOLDERS.inventario} />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 

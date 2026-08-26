@@ -1,22 +1,19 @@
-import { useState, type ReactNode } from 'react'
+import { Outlet } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import type { Usuario } from '@/lib/api'
 
-import { Sidebar, type Seccion } from './Sidebar'
+import { Sidebar } from './Sidebar'
 
 interface AppShellProps {
   usuario: Usuario
   onLogout: () => void
-  children: (seccion: Seccion) => ReactNode
 }
 
-export function AppShell({ usuario, onLogout, children }: AppShellProps) {
-  const [seccion, setSeccion] = useState<Seccion>('contabilidad')
-
+export function AppShell({ usuario, onLogout }: AppShellProps) {
   return (
     <div className="flex h-svh">
-      <Sidebar seccionActiva={seccion} onCambiarSeccion={setSeccion} />
+      <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-border px-6 py-3">
           <span className="font-mono text-sm font-medium tracking-tight">sistema-af</span>
@@ -29,7 +26,9 @@ export function AppShell({ usuario, onLogout, children }: AppShellProps) {
             </Button>
           </div>
         </header>
-        <main className="flex-1 overflow-auto px-6 py-5">{children(seccion)}</main>
+        <main className="flex-1 overflow-auto px-6 py-5">
+          <Outlet />
+        </main>
       </div>
     </div>
   )
