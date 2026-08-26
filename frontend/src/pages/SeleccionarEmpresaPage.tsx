@@ -56,7 +56,7 @@ export function SeleccionarEmpresaPage({ token, onSeleccionado }: SeleccionarEmp
   }
 
   return (
-    <div className="bg-ledger bg-glow relative flex min-h-svh items-center justify-center overflow-hidden bg-background">
+    <div className="bg-ledger bg-glow relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>

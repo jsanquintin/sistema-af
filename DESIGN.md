@@ -36,7 +36,7 @@
 
 ## Layout
 - **Approach:** grid-disciplined — columnas estrictas, alineación predecible. Sin asimetría editorial: el usuario necesita escanear tablas rápido, no explorar una composición creativa.
-- **Grid:** sidebar fija (200px) + contenido fluido en desktop; sidebar colapsable en mobile/tablet (no priorizado para v1 — es una herramienta de escritorio de oficina/finca).
+- **Grid:** sidebar fija (200px) + contenido fluido en `lg:` (1024px) y arriba; por debajo, sidebar como overlay (drawer) activado por un botón de menú en el header, con scrim para cerrar. Implementado — el usuario pidió que todo el proyecto sea responsive, ya no queda como "no priorizado para v1".
 - **Max content width:** sin límite duro en las tablas (deben usar el ancho disponible); 1100px para contenido de lectura (esta misma página de preview).
 - **Border radius:** sm 4px, md 6px, lg 10px — sutil, no la estética "bubbly" de radios grandes uniformes.
 
@@ -52,3 +52,4 @@
 | 2026-08-25 | Modo oscuro por defecto, `--card` con elevación real | Feedback repetido de que la versión clara/plana se sentía "seca". Se autorizó explícitamente desviarse del minimalismo original hacia más contraste y profundidad. |
 | 2026-08-25 | Acento cambiado de cobre a verde oliva militar | El cobre (`#B5622A`/`#e08347`) resultó a 1.8°-14° de hue del ámbar de marca de Torquéalo/Mecanix (`C:\mecanix`), otro proyecto ya trabajado con el mismo stack shadcn — riesgo real de parentesco visual. Verde oliva (`#626f20`/`#b0c26e`) rompe la familia de color (71° de diferencia) y refuerza Industrial/Utilitarian de forma más literal. |
 | 2026-08-26 | Verde de modo claro aclarado (`#4b5320` → `#626f20`) | El tono original pasaba AA (7.7:1) pero a esa oscuridad se leía casi negro, no verde. Se subió saturación/luminosidad manteniendo el mismo hue (69.4°) hasta el límite seguro de contraste (5.2:1 contra el fondo, 5.3:1 con texto blanco encima) — se ve claramente verde sin perder legibilidad. |
+| 2026-08-26 | Sidebar responsive (drawer por debajo de `lg`) | El usuario pidió que todo el proyecto sea auto-responsive; se revirtió la decisión anterior de no priorizar mobile/tablet. De paso se eliminaron los tokens `--sidebar*` sin usar del preset original de shadcn (en dark mode `--sidebar-primary` seguía siendo azul, un riesgo si algo los llegaba a usar por accidente). |
