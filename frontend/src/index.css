@@ -7,6 +7,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+    /* Curvas de easing con mas "punch" que las de CSS -- las genericas
+       (ease-out nativo) se sienten blandas para UI. */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
     --font-heading: var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
     --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
@@ -149,18 +153,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Textura tecnica sutil (grid de precision) en vez de decoracion
-     ilustrativa -- linea unica, opacidad baja, encaja con la direccion
-     Industrial/Utilitarian de DESIGN.md (cero ilustracion). */
-  .bg-grid {
-    background-image:
-      linear-gradient(to right, var(--border) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--border) 1px, transparent 1px);
-    background-size: 32px 32px;
-    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
-  }
-
   /* Resplandor de acento detras del contenido hero -- una sola fuente de
      color (el acento de marca), no un gradiente decorativo multicolor. */
   .bg-glow::before {
@@ -188,7 +180,7 @@
 }
 
 .animate-enter {
-  animation: enter 200ms ease-out;
+  animation: enter 200ms var(--ease-out);
 }
 
 @media (prefers-reduced-motion: reduce) {
