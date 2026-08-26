@@ -52,6 +52,7 @@ export interface Empresa {
   razon_social: string
   nombre_comercial: string | null
 }
+export type EmpresaInput = Omit<Empresa, 'id'>
 
 export interface Sucursal {
   id: number
@@ -162,6 +163,9 @@ export async function getMe(token: string): Promise<Usuario> {
 export const getEmpresas = (token: string) =>
   request<Empresa[]>('GET', '/empresas', token, undefined, 'No se pudieron cargar las empresas')
 
+export const actualizarEmpresa = (token: string, id: number, data: EmpresaInput) =>
+  request<Empresa>('PUT', `/empresas/${id}`, token, data, 'No se pudo actualizar la empresa')
+
 export const getSucursales = (token: string, empresaId: number) =>
   request<Sucursal[]>('GET', `/empresas/${empresaId}/sucursales`, token, undefined, 'No se pudieron cargar las sucursales')
 export const crearSucursal = (token: string, empresaId: number, data: SucursalInput) =>
@@ -171,6 +175,14 @@ export const crearSucursal = (token: string, empresaId: number, data: SucursalIn
     token,
     data,
     'No se pudo crear la sucursal'
+  )
+export const actualizarSucursal = (token: string, empresaId: number, sucursalId: number, data: SucursalInput) =>
+  request<Sucursal>(
+    'PUT',
+    `/empresas/${empresaId}/sucursales/${sucursalId}`,
+    token,
+    data,
+    'No se pudo actualizar la sucursal'
   )
 
 export const getPlanCuentas = (token: string, empresaId: number) =>

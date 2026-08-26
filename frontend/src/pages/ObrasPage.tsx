@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
 import {
   ApiError,
   actualizarObra,
@@ -89,7 +90,6 @@ export function ObrasPage({ token, empresaId }: ObrasPageProps) {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setGuardando(true)
-    setError(null)
     const payload = {
       empresa_id: empresaId,
       sucursal_id: Number(form.sucursal_id),
@@ -106,8 +106,13 @@ export function ObrasPage({ token, empresaId }: ObrasPageProps) {
       else await crearObra(token, payload)
       setMostrarForm(false)
       cargar()
+      toast({ variant: 'success', title: editandoId ? 'Obra actualizada' : 'Obra creada' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo guardar la obra')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo guardar la obra',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setGuardando(false)
     }
@@ -118,8 +123,13 @@ export function ObrasPage({ token, empresaId }: ObrasPageProps) {
     try {
       await eliminarObra(token, obra.id)
       cargar()
+      toast({ variant: 'success', title: 'Obra eliminada' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo eliminar la obra')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo eliminar la obra',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     }
   }
 

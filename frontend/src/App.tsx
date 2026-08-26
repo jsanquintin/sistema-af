@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppShell } from '@/components/layout/AppShell'
+import { Toaster } from '@/components/ui/toaster'
 import { getEmpresas, getMe, getSucursales, type Empresa, type Sucursal, type Usuario } from '@/lib/api'
 import { AlmacenesPage } from '@/pages/AlmacenesPage'
 import { AsientosPage } from '@/pages/AsientosPage'
@@ -137,7 +138,9 @@ function App() {
   }
 
   return (
-    <Routes>
+    <>
+      <Toaster />
+      <Routes>
       <Route
         path="/login"
         element={
@@ -240,7 +243,8 @@ function App() {
         ))}
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </>
   )
 }
 

@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
 import {
   ApiError,
   crearInventarioMovimiento,
@@ -72,7 +73,6 @@ export function InventarioMovimientosPage({ token, empresaId }: InventarioMovimi
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setGuardando(true)
-    setError(null)
     try {
       await crearInventarioMovimiento(token, {
         lote_id: Number(form.lote_id),
@@ -85,8 +85,13 @@ export function InventarioMovimientosPage({ token, empresaId }: InventarioMovimi
       })
       setMostrarForm(false)
       cargar()
+      toast({ variant: 'success', title: 'Movimiento registrado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo registrar el movimiento')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo registrar el movimiento',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setGuardando(false)
     }

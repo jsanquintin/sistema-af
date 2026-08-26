@@ -3,6 +3,12 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 
+class EmpresaUpdate(BaseModel):
+    rnc: str
+    razon_social: str
+    nombre_comercial: str | None = None
+
+
 class EmpresaResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

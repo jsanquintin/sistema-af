@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
 import {
   ApiError,
   crearFactura,
@@ -92,7 +93,6 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setGuardando(true)
-    setError(null)
     try {
       await crearFactura(token, {
         empresa_id: empresaId,
@@ -107,8 +107,13 @@ export function FacturasPage({ token, empresaId }: FacturasPageProps) {
       })
       setMostrarForm(false)
       cargar()
+      toast({ variant: 'success', title: 'Factura creada' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo crear la factura')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo crear la factura',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setGuardando(false)
     }

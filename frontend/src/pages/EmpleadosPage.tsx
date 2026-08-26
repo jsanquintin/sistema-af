@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
 import {
   ApiError,
   actualizarEmpleado,
@@ -79,7 +80,6 @@ export function EmpleadosPage({ token, empresaId }: EmpleadosPageProps) {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setGuardando(true)
-    setError(null)
     const payload = {
       empresa_id: empresaId,
       sucursal_id: form.sucursal_id ? Number(form.sucursal_id) : null,
@@ -97,8 +97,13 @@ export function EmpleadosPage({ token, empresaId }: EmpleadosPageProps) {
       else await crearEmpleado(token, payload)
       setMostrarForm(false)
       cargar()
+      toast({ variant: 'success', title: editandoId ? 'Empleado actualizado' : 'Empleado creado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo guardar el empleado')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo guardar el empleado',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setGuardando(false)
     }
@@ -109,8 +114,13 @@ export function EmpleadosPage({ token, empresaId }: EmpleadosPageProps) {
     try {
       await eliminarEmpleado(token, empleado.id)
       cargar()
+      toast({ variant: 'success', title: 'Empleado desactivado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo desactivar el empleado')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo desactivar el empleado',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     }
   }
 

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
 import {
   ApiError,
   actualizarLoteCosecha,
@@ -93,7 +94,6 @@ export function LotesCosechaPage({ token, empresaId }: LotesCosechaPageProps) {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setGuardando(true)
-    setError(null)
     const payload = {
       sucursal_id: Number(form.sucursal_id),
       almacen_id: form.almacen_id ? Number(form.almacen_id) : null,
@@ -109,8 +109,13 @@ export function LotesCosechaPage({ token, empresaId }: LotesCosechaPageProps) {
       else await crearLoteCosecha(token, payload)
       setMostrarForm(false)
       cargar()
+      toast({ variant: 'success', title: editandoId ? 'Lote actualizado' : 'Lote creado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo guardar el lote')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo guardar el lote',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setGuardando(false)
     }
@@ -121,8 +126,13 @@ export function LotesCosechaPage({ token, empresaId }: LotesCosechaPageProps) {
     try {
       await eliminarLoteCosecha(token, lote.id)
       cargar()
+      toast({ variant: 'success', title: 'Lote eliminado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo eliminar el lote')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo eliminar el lote',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     }
   }
 

@@ -3,6 +3,7 @@ import { Fragment, useEffect, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
 import {
   ApiError,
   calcularNomina,
@@ -73,7 +74,6 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setGuardando(true)
-    setError(null)
     const [costeableTipo, costeableIdStr] = form.costeable ? form.costeable.split(':') : [null, null]
     try {
       await crearNominaCorrida(token, {
@@ -89,8 +89,13 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
       })
       setMostrarForm(false)
       cargar()
+      toast({ variant: 'success', title: 'Corrida de nómina creada' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo crear la corrida')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo crear la corrida',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setGuardando(false)
     }
@@ -103,7 +108,6 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
 
   async function handleCalcular(corridaId: number) {
     setProcesando(corridaId)
-    setError(null)
     try {
       const dias = Object.fromEntries(
         Object.entries(diasPorEmpleado)
@@ -114,8 +118,13 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
       setDetalle(filas)
       setDetalleAbierto(corridaId)
       setCalculandoId(null)
+      toast({ variant: 'success', title: 'Nómina calculada', description: `${filas.length} líneas generadas` })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo calcular la nómina')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo calcular la nómina',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setProcesando(null)
     }
@@ -124,12 +133,16 @@ export function NominaCorridasPage({ token, empresaId }: NominaCorridasPageProps
   async function handleCerrar(corridaId: number) {
     if (!confirm('¿Cerrar esta corrida? Genera el asiento contable y ya no se puede recalcular.')) return
     setProcesando(corridaId)
-    setError(null)
     try {
       await cerrarNomina(token, corridaId)
       cargar()
+      toast({ variant: 'success', title: 'Corrida cerrada', description: 'Asiento contable generado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo cerrar la corrida')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo cerrar la corrida',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setProcesando(null)
     }

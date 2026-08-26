@@ -158,6 +158,63 @@ def test_crear_sucursal_rechaza_empresa_no_autorizada():
     assert response.status_code == 403
 
 
+def test_actualizar_empresa_modifica_campos():
+    usuario = _fake_usuario()
+    empresa = Empresa(id=7, tenant_id=usuario.tenant_id, rnc="131-71466-8", razon_social="Inversiones Creixa SRL")
+    fake_app_session = MagicMock()
+    fake_app_session.get.return_value = empresa
+
+    app.dependency_overrides[get_current_user] = lambda: usuario
+    with patch("app.core.deps.AppSessionLocal", return_value=fake_app_session):
+        client = TestClient(app)
+        response = client.put(
+            "/empresas/7",
+            json={"rnc": "131-71466-8", "razon_social": "Inversiones Creixa SRL", "nombre_comercial": "Creixa"},
+        )
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert empresa.nombre_comercial == "Creixa"
+
+
+def test_actualizar_sucursal_modifica_campos():
+    usuario = _fake_usuario()
+    sucursal = Sucursal(id=1, tenant_id=usuario.tenant_id, empresa_id=7, codigo="SD", nombre="Santo Domingo", tipo="oficina")
+    fake_app_session = MagicMock()
+    fake_app_session.get.return_value = sucursal
+
+    app.dependency_overrides[get_current_user] = lambda: usuario
+    with patch("app.core.deps.AppSessionLocal", return_value=fake_app_session):
+        client = TestClient(app)
+        response = client.put(
+            "/empresas/7/sucursales/1",
+            json={"codigo": "SD2", "nombre": "Santo Domingo Este", "tipo": "oficina"},
+        )
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert sucursal.codigo == "SD2"
+    assert sucursal.nombre == "Santo Domingo Este"
+
+
+def test_actualizar_sucursal_de_otra_empresa_devuelve_404():
+    usuario = _fake_usuario()
+    sucursal_ajena = Sucursal(id=1, tenant_id=usuario.tenant_id, empresa_id=9, codigo="SD", nombre="SD", tipo="oficina")
+    fake_app_session = MagicMock()
+    fake_app_session.get.return_value = sucursal_ajena
+
+    app.dependency_overrides[get_current_user] = lambda: usuario
+    with patch("app.core.deps.AppSessionLocal", return_value=fake_app_session):
+        client = TestClient(app)
+        response = client.put(
+            "/empresas/7/sucursales/1",
+            json={"codigo": "SD", "nombre": "SD", "tipo": "oficina"},
+        )
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 404
+
+
 def test_crear_sucursal_empresa_inexistente_devuelve_404():
     usuario = _fake_usuario()
     fake_app_session = MagicMock()

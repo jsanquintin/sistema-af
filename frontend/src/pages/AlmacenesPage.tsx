@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
 import {
   ApiError,
   actualizarAlmacen,
@@ -59,15 +60,19 @@ export function AlmacenesPage({ token, empresaId }: AlmacenesPageProps) {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setGuardando(true)
-    setError(null)
     const payload = { sucursal_id: Number(form.sucursal_id), codigo: form.codigo, nombre: form.nombre }
     try {
       if (editandoId) await actualizarAlmacen(token, editandoId, payload)
       else await crearAlmacen(token, payload)
       setMostrarForm(false)
       cargar()
+      toast({ variant: 'success', title: editandoId ? 'Almacén actualizado' : 'Almacén creado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo guardar el almacén')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo guardar el almacén',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setGuardando(false)
     }
@@ -78,8 +83,13 @@ export function AlmacenesPage({ token, empresaId }: AlmacenesPageProps) {
     try {
       await eliminarAlmacen(token, almacen.id)
       cargar()
+      toast({ variant: 'success', title: 'Almacén desactivado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo desactivar el almacén')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo desactivar el almacén',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     }
   }
 

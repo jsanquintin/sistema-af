@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
 import {
   ApiError,
   crearAsiento,
@@ -75,7 +76,6 @@ export function AsientosPage({ token, empresaId }: AsientosPageProps) {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setGuardando(true)
-    setError(null)
     try {
       await crearAsiento(token, empresaId, {
         fecha,
@@ -84,8 +84,13 @@ export function AsientosPage({ token, empresaId }: AsientosPageProps) {
       })
       setMostrarForm(false)
       cargar()
+      toast({ variant: 'success', title: 'Asiento creado como borrador' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo crear el asiento')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo crear el asiento',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setGuardando(false)
     }
@@ -93,12 +98,16 @@ export function AsientosPage({ token, empresaId }: AsientosPageProps) {
 
   async function handlePostear(asiento: Asiento) {
     setPosteando(asiento.id)
-    setError(null)
     try {
       await postearAsiento(token, asiento.id)
       cargar()
+      toast({ variant: 'success', title: 'Asiento posteado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo postear el asiento')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo postear el asiento',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setPosteando(null)
     }

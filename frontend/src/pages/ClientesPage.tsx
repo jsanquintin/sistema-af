@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
 import {
   ApiError,
   actualizarCliente,
@@ -55,7 +56,6 @@ export function ClientesPage({ token, empresaId }: ClientesPageProps) {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setGuardando(true)
-    setError(null)
     const payload = {
       empresa_id: empresaId,
       rnc_cedula: form.rnc_cedula || null,
@@ -68,8 +68,13 @@ export function ClientesPage({ token, empresaId }: ClientesPageProps) {
       else await crearCliente(token, payload)
       setMostrarForm(false)
       cargar()
+      toast({ variant: 'success', title: editandoId ? 'Cliente actualizado' : 'Cliente creado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo guardar el cliente')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo guardar el cliente',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     } finally {
       setGuardando(false)
     }
@@ -80,8 +85,13 @@ export function ClientesPage({ token, empresaId }: ClientesPageProps) {
     try {
       await eliminarCliente(token, cliente.id)
       cargar()
+      toast({ variant: 'success', title: 'Cliente eliminado' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo eliminar el cliente')
+      toast({
+        variant: 'destructive',
+        title: 'No se pudo eliminar el cliente',
+        description: err instanceof ApiError ? err.message : undefined,
+      })
     }
   }
 
