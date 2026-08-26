@@ -130,3 +130,53 @@
     @apply font-sans;
     }
 }
+
+/* Escala tipografica de DESIGN.md, como utilidades reusables en vez de
+   tamanos sueltos repetidos por componente. */
+@layer utilities {
+  .text-hero {
+    font-size: 44px;
+    line-height: 1.1;
+  }
+  .text-section-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .font-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Textura tecnica sutil (grid de precision) en vez de decoracion
+     ilustrativa -- linea unica, opacidad baja, encaja con la direccion
+     Industrial/Utilitarian de DESIGN.md (cero ilustracion). */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, var(--border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+    background-size: 32px 32px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-enter {
+  animation: enter 220ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-enter {
+    animation: none;
+  }
+}

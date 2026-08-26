@@ -13,9 +13,10 @@ const secciones: { id: Seccion; label: string; icon: typeof BookOpen }[] = [
 export function Sidebar() {
   return (
     <nav className="flex w-[200px] shrink-0 flex-col gap-1 border-r border-border p-4">
-      <span className="mb-3 px-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-        Agrocasa/Creixa
-      </span>
+      <div className="mb-3 flex items-center gap-1.5 px-2">
+        <span className="size-1.5 rounded-[2px] bg-primary" />
+        <span className="text-section-label font-medium text-muted-foreground">Agrocasa/Creixa</span>
+      </div>
       {secciones.map(({ id, label, icon: Icon }) => (
         <NavLink
           key={id}
