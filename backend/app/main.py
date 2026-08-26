@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, plan_cuentas
+from app.api import auth, empresas, plan_cuentas
 from app.core.config import settings
 
 app = FastAPI(title="sistema-af")
@@ -15,6 +15,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(empresas.router)
 app.include_router(plan_cuentas.router)
 
 

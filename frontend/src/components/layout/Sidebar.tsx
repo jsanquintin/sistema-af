@@ -1,7 +1,15 @@
 import { BookOpen, Boxes, ReceiptText, Users } from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
+
+import type { Empresa, Sucursal } from '@/lib/api'
 
 export type Seccion = 'contabilidad' | 'nomina' | 'facturacion' | 'inventario'
+
+interface SidebarProps {
+  empresa: Empresa
+  sucursal: Sucursal | null
+  onCambiarEmpresa: () => void
+}
 
 const secciones: { id: Seccion; label: string; icon: typeof BookOpen }[] = [
   { id: 'contabilidad', label: 'Contabilidad', icon: BookOpen },
@@ -10,12 +18,26 @@ const secciones: { id: Seccion; label: string; icon: typeof BookOpen }[] = [
   { id: 'inventario', label: 'Inventario', icon: Boxes },
 ]
 
-export function Sidebar() {
+export function Sidebar({ empresa, sucursal, onCambiarEmpresa }: SidebarProps) {
   return (
     <nav className="flex w-[200px] shrink-0 flex-col gap-1 border-r border-border p-4">
-      <div className="mb-3 flex items-center gap-1.5 px-2">
-        <span className="size-1.5 rounded-[2px] bg-primary" />
-        <span className="text-section-label font-medium text-muted-foreground">Agrocasa/Creixa</span>
+      <div className="mb-3 px-2">
+        <div className="flex items-center gap-1.5">
+          <span className="size-1.5 rounded-[2px] bg-primary" />
+          <span className="text-section-label truncate font-medium text-muted-foreground">
+            {empresa.nombre_comercial ?? empresa.razon_social}
+          </span>
+        </div>
+        <div className="mt-0.5 flex items-center justify-between pl-3">
+          <span className="truncate text-xs text-muted-foreground/70">{sucursal?.nombre ?? 'Todas las sucursales'}</span>
+          <Link
+            to="/seleccionar-empresa"
+            onClick={onCambiarEmpresa}
+            className="cursor-pointer text-xs text-primary hover:underline"
+          >
+            Cambiar
+          </Link>
+        </div>
       </div>
       {secciones.map(({ id, label, icon: Icon }) => (
         <NavLink

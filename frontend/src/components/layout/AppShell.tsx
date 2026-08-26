@@ -2,19 +2,22 @@ import { Outlet } from 'react-router-dom'
 
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
-import type { Usuario } from '@/lib/api'
+import type { Empresa, Sucursal, Usuario } from '@/lib/api'
 
 import { Sidebar } from './Sidebar'
 
 interface AppShellProps {
   usuario: Usuario
+  empresa: Empresa
+  sucursal: Sucursal | null
   onLogout: () => void
+  onCambiarEmpresa: () => void
 }
 
-export function AppShell({ usuario, onLogout }: AppShellProps) {
+export function AppShell({ usuario, empresa, sucursal, onLogout, onCambiarEmpresa }: AppShellProps) {
   return (
     <div className="flex h-svh">
-      <Sidebar />
+      <Sidebar empresa={empresa} sucursal={sucursal} onCambiarEmpresa={onCambiarEmpresa} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-border px-6 py-3">
           <div className="flex items-center gap-2">
