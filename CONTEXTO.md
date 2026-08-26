@@ -7,9 +7,23 @@ puede renombrar después sin fricción.
 
 ## Cliente y alcance
 Reemplazo de Soluflex para dos empresas hermanas del mismo grupo:
-**Agrocasa** (agroexportación de café/cacao) y **Creixa** (Inversiones
-Creixa, SRL). Fase 1 cubre los 4 módulos: contabilidad, nómina,
-facturación e inventario — todos con la misma prioridad.
+**Agrocasa** (agroexportación de café/cacao, seedeada en el entorno real
+como "AGROTECNICA" — nombre comercial, no confirmado 1:1 contra DGII
+todavía) y **Creixa** (razón social real "Inversiones Creixa, SRL",
+RNC 131-71466-8, verificado contra el portal de RNC de DGII el
+2026-08-26). **Corrección importante:** el nombre "Inversiones Creixa"
+sugiere una empresa de inversiones/portafolio, pero su actividad
+económica registrada en DGII es **"CONSTR. REFORMA Y REPARACIÓN DE
+EDIFICIOS RESIDENCIALES"** — es decir, Creixa es una constructora, no
+un vehículo de inversión. Esto importa para el catálogo de cuentas de
+Creixa (costeo de obra/proyecto — materiales, subcontratistas, obra en
+proceso — no cuentas de portafolio de inversión) aunque no cambia la
+decisión de numeración propia por empresa ya tomada (ver design doc).
+DGII también confirma **Facturador Electrónico: SI** para Creixa —
+evidencia real (no solo juicio profesional) de que e-CF aplica, ver
+Open Question 2 del design doc. Fase 1 cubre los 4 módulos:
+contabilidad, nómina, facturación e inventario — todos con la misma
+prioridad.
 
 ## Stack decidido
 - Backend: **FastAPI + PostgreSQL**
