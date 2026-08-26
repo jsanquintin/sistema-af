@@ -17,6 +17,7 @@ import { LotesCosechaPage } from '@/pages/LotesCosechaPage'
 import { NominaCorridasPage } from '@/pages/NominaCorridasPage'
 import { ObrasPage } from '@/pages/ObrasPage'
 import { PlanCuentasPage } from '@/pages/PlanCuentasPage'
+import { ReglasContabilizacionPage } from '@/pages/ReglasContabilizacionPage'
 import { ReportesPage } from '@/pages/ReportesPage'
 import { SeccionPlaceholder } from '@/pages/SeccionPlaceholder'
 import { SeleccionarEmpresaPage } from '@/pages/SeleccionarEmpresaPage'
@@ -194,6 +195,10 @@ function App() {
         <Route
           path="/contabilidad/plan-cuentas"
           element={token && empresa && <PlanCuentasPage token={token} empresaId={empresa.id} />}
+        />
+        <Route
+          path="/contabilidad/reglas"
+          element={token && empresa && <ReglasContabilizacionPage token={token} empresaId={empresa.id} />}
         />
         <Route
           path="/contabilidad/asientos"

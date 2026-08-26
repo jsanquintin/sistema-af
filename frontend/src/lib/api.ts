@@ -338,6 +338,8 @@ export const getReglasContabilizacion = (token: string, empresaId: number) =>
   )
 export const crearReglaContabilizacion = (token: string, data: ReglaContabilizacionInput) =>
   request<ReglaContabilizacion>('POST', '/reglas-contabilizacion', token, data, 'No se pudo crear la regla')
+export const actualizarReglaContabilizacion = (token: string, id: number, data: ReglaContabilizacionInput) =>
+  request<ReglaContabilizacion>('PUT', `/reglas-contabilizacion/${id}`, token, data, 'No se pudo actualizar la regla')
 export const eliminarReglaContabilizacion = (token: string, id: number) =>
   request<void>('DELETE', `/reglas-contabilizacion/${id}`, token, undefined, 'No se pudo eliminar la regla')
 

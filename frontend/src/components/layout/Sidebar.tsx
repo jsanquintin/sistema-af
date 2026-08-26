@@ -30,6 +30,7 @@ const modulos: Modulo[] = [
     icon: BookOpen,
     items: [
       { path: 'plan-cuentas', label: 'Plan de Cuentas' },
+      { path: 'reglas', label: 'Reglas de Contabilización' },
       { path: 'asientos', label: 'Asientos' },
       { path: 'reportes', label: 'Reportes' },
     ],
