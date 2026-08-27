@@ -26,6 +26,11 @@ def _override_db_returning(usuarios: list[Usuario]):
     def _get_db_override():
         fake_db = MagicMock()
         fake_db.execute.return_value.scalars.return_value.all.return_value = usuarios
+        # Cuando `usuarios` viene vacio, login() tambien prueba `superadmins`
+        # en la misma sesion (ver app/api/auth.py) -- sin esto, un
+        # MagicMock() no configurado se cuela como si fuera un superadmin
+        # real y explota en verify_password() con un hash falso.
+        fake_db.execute.return_value.scalar_one_or_none.return_value = None
         yield fake_db
 
     return _get_db_override

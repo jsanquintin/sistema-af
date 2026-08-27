@@ -3,7 +3,17 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppShell } from '@/components/layout/AppShell'
 import { Toaster } from '@/components/ui/toaster'
-import { getEmpresas, getMe, getSucursales, type Empresa, type Sucursal, type Usuario } from '@/lib/api'
+import {
+  decodeJwtPayload,
+  getEmpresas,
+  getMe,
+  getSucursales,
+  SUPERADMIN_TOKEN_STORAGE_KEY,
+  TENANT_TOKEN_STORAGE_KEY,
+  type Empresa,
+  type Sucursal,
+  type Usuario,
+} from '@/lib/api'
 import { AlmacenesPage } from '@/pages/AlmacenesPage'
 import { AsientosPage } from '@/pages/AsientosPage'
 import { ClientesPage } from '@/pages/ClientesPage'
@@ -21,9 +31,10 @@ import { ReglasContabilizacionPage } from '@/pages/ReglasContabilizacionPage'
 import { ReportesPage } from '@/pages/ReportesPage'
 import { SeccionPlaceholder } from '@/pages/SeccionPlaceholder'
 import { SeleccionarEmpresaPage } from '@/pages/SeleccionarEmpresaPage'
+import { SuperadminPage } from '@/pages/SuperadminPage'
 import { UsuariosPage } from '@/pages/UsuariosPage'
 
-const TOKEN_STORAGE_KEY = 'sistema-af.token'
+const TOKEN_STORAGE_KEY = TENANT_TOKEN_STORAGE_KEY
 const EMPRESA_STORAGE_KEY = 'sistema-af.empresaId'
 const SUCURSAL_STORAGE_KEY = 'sistema-af.sucursalId'
 
@@ -68,6 +79,9 @@ async function resolverEmpresaYSucursal(
 
 function App() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_STORAGE_KEY))
+  const [superadminToken, setSuperadminToken] = useState<string | null>(() =>
+    localStorage.getItem(SUPERADMIN_TOKEN_STORAGE_KEY)
+  )
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [checking, setChecking] = useState(false)
   const [empresa, setEmpresa] = useState<Empresa | null>(null)
@@ -107,8 +121,23 @@ function App() {
   }, [token, usuario, empresa])
 
   function handleLoginSuccess(newToken: string) {
+    // Un solo formulario de login para tenant y superadmin (ver
+    // docs/designs/panel-superadmin-multitenant.md) -- /auth/login
+    // devuelve un JWT con shape distinto segun cual haya sido; el
+    // frontend decide a donde aterrizar leyendo ese shape, nunca antes.
+    const payload = decodeJwtPayload(newToken)
+    if (payload?.kind === 'superadmin') {
+      localStorage.setItem(SUPERADMIN_TOKEN_STORAGE_KEY, newToken)
+      setSuperadminToken(newToken)
+      return
+    }
     localStorage.setItem(TOKEN_STORAGE_KEY, newToken)
     setToken(newToken)
+  }
+
+  function handleSuperadminLogout() {
+    localStorage.removeItem(SUPERADMIN_TOKEN_STORAGE_KEY)
+    setSuperadminToken(null)
   }
 
   function handleSeleccionEmpresa(nuevaEmpresa: Empresa, nuevaSucursal: Sucursal | null) {
@@ -149,8 +178,20 @@ function App() {
         element={
           token ? (
             <Navigate to="/dashboard" replace />
+          ) : superadminToken ? (
+            <Navigate to="/superadmin" replace />
           ) : (
             <LoginPage onLoginSuccess={handleLoginSuccess} />
+          )
+        }
+      />
+      <Route
+        path="/superadmin"
+        element={
+          !superadminToken ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <SuperadminPage token={superadminToken} onLogout={handleSuperadminLogout} />
           )
         }
       />
@@ -178,6 +219,7 @@ function App() {
             <Navigate to="/seleccionar-empresa" replace />
           ) : (
             <AppShell
+              token={token}
               usuario={usuario}
               empresa={empresa}
               sucursal={sucursal}

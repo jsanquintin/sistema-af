@@ -13,6 +13,8 @@ from app.models.plan_cuenta import PlanCuenta
 from app.models.regla_contabilizacion import ReglaContabilizacion
 from app.models.secuencia_ecf import SecuenciaEcf
 from app.models.sucursal import Sucursal
+from app.models.superadmin import Superadmin
+from app.models.superadmin_auditoria import SuperadminAuditoria
 from app.models.tenant import Tenant
 from app.models.usuario import Usuario
 
@@ -35,6 +37,8 @@ __all__ = [
     "ReglaContabilizacion",
     "SecuenciaEcf",
     "Sucursal",
+    "Superadmin",
+    "SuperadminAuditoria",
     "Tenant",
     "Usuario",
 ]

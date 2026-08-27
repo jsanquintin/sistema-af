@@ -1,5 +1,11 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
+// Claves de localStorage compartidas entre App.tsx (sesion de tenant) y el
+// panel de superadmin -- viven aca para que ambos lados escriban/lean
+// exactamente la misma clave al aterrizar un JWT de impersonation.
+export const TENANT_TOKEN_STORAGE_KEY = 'sistema-af.token'
+export const SUPERADMIN_TOKEN_STORAGE_KEY = 'sistema-af.superadminToken'
+
 export class ApiError extends Error {
   status: number
 
@@ -36,6 +42,16 @@ async function request<T>(
 export interface LoginResponse {
   access_token: string
   token_type: string
+}
+
+export function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const [, payloadB64] = token.split('.')
+    const json = atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/'))
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
 }
 
 export type Rol = 'admin' | 'contador' | 'nomina' | 'facturacion' | 'consulta'
@@ -522,4 +538,42 @@ export const restablecerPasswordUsuario = (token: string, usuarioId: string, nue
     token,
     { nueva_password: nuevaPassword },
     'No se pudo restablecer la contraseña'
+  )
+
+// ── Superadmin (panel multi-tenant) ─────────────────────────────────────
+
+export interface Tenant {
+  id: string
+  nombre: string
+  activo: boolean
+}
+
+export interface TenantCreateInput {
+  nombre: string
+  admin_email: string
+  admin_password: string
+  admin_nombre_completo: string
+}
+
+export interface TenantCreateResult {
+  tenant: Tenant
+  admin_email: string
+}
+
+export const getTenants = (token: string) =>
+  request<Tenant[]>('GET', '/superadmin/tenants', token, undefined, 'No se pudieron cargar los tenants')
+
+export const crearTenant = (token: string, input: TenantCreateInput) =>
+  request<TenantCreateResult>('POST', '/superadmin/tenants', token, input, 'No se pudo crear el tenant')
+
+export const actualizarTenant = (token: string, tenantId: string, activo: boolean) =>
+  request<Tenant>('PATCH', `/superadmin/tenants/${tenantId}`, token, { activo }, 'No se pudo actualizar el tenant')
+
+export const entrarATenant = (token: string, tenantId: string) =>
+  request<LoginResponse>(
+    'POST',
+    `/superadmin/tenants/${tenantId}/entrar`,
+    token,
+    undefined,
+    'No se pudo entrar al tenant'
   )

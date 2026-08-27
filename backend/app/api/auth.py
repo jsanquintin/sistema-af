@@ -3,7 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, get_db
-from app.core.security import create_access_token, verify_password
+from app.core.security import create_access_token, create_superadmin_token, verify_password
+from app.models.superadmin import Superadmin
 from app.models.usuario import Usuario
 from app.schemas.auth import LoginRequest, TokenResponse
 
@@ -25,15 +26,28 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse
         select(Usuario).where(Usuario.email == payload.email, Usuario.activo.is_(True))
     ).scalars().all()
 
-    if len(usuarios) != 1:
+    if len(usuarios) == 1:
+        usuario = usuarios[0]
+        if verify_password(payload.password, usuario.hash_password):
+            token = create_access_token(usuario_id=usuario.id, tenant_id=usuario.tenant_id, rol=usuario.rol)
+            return TokenResponse(access_token=token)
         raise _INVALID_CREDENTIALS
 
-    usuario = usuarios[0]
-    if not verify_password(payload.password, usuario.hash_password):
-        raise _INVALID_CREDENTIALS
+    if len(usuarios) == 0:
+        # Sin usuario de tenant con ese email: puede ser un superadmin.
+        # Un solo formulario de login para ambos -- ver
+        # docs/designs/panel-superadmin-multitenant.md. Deliberadamente NO
+        # se intenta esto cuando ya hubo un match de tenant (len == 1) con
+        # password incorrecto, para no crear un segundo intento de match
+        # sobre la misma credencial.
+        superadmin = db.execute(
+            select(Superadmin).where(Superadmin.email == payload.email, Superadmin.activo.is_(True))
+        ).scalar_one_or_none()
+        if superadmin is not None and verify_password(payload.password, superadmin.hash_password):
+            token = create_superadmin_token(superadmin_id=superadmin.id)
+            return TokenResponse(access_token=token)
 
-    token = create_access_token(usuario_id=usuario.id, tenant_id=usuario.tenant_id, rol=usuario.rol)
-    return TokenResponse(access_token=token)
+    raise _INVALID_CREDENTIALS
 
 
 @router.get("/me")
